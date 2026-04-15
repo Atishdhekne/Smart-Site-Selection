@@ -1,3 +1,61 @@
+========== FOLDER STRUCTURE ==========
+
+SmartSite/
+    .gitignore
+    app.py
+    README.md
+    requirements.txt
+    data/
+        audit_log.csv
+        chat_usage.csv
+        feasibility_responses_new_trial.csv
+        notifications.csv
+        principal_investigators.csv
+        README.md
+        recommended_top_sites.csv
+        sites.csv
+        site_actions.csv
+        site_performance_history.csv
+        survey_tracking.csv
+        users.csv
+
+
+========== FILE CONTENTS ==========
+
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\.gitignore
+================================================================================
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+.venv/
+.kilo/
+venv/
+env/
+
+# CLI scripts
+*.cmd
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Optional (if you use VSCode / PyCharm)
+.vscode/
+.idea/
+
+.gitignore
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\app.py
+================================================================================
+
 from __future__ import annotations
 
 import json
@@ -923,88 +981,18 @@ def metric_cards(items):
     st.markdown(html, unsafe_allow_html=True)
 
 
-def apply_global_filters(df: pd.DataFrame, filters: dict) -> pd.DataFrame:
-    out = df.copy()
-    region = normalize_text_value(filters.get("region", "All"))
-    country = normalize_text_value(filters.get("country", "All"))
-    institution = normalize_text_value(filters.get("institution", "All"))
-    interest = normalize_text_value(filters.get("interest", "All"))
-    min_score_raw = pd.to_numeric(filters.get("min_ai_rank", 0), errors="coerce")
-    min_score = int(0 if _is_missing(min_score_raw) else min_score_raw)
-
+def filtered_master(region: str, country: str, institution: str, interest: str, min_score: int) -> pd.DataFrame:
+    df = MASTER.copy()
     if region != "All":
-        out = out[out["region"] == region]
+        df = df[df["region"] == region]
     if country != "All":
-        out = out[out["country"] == country]
+        df = df[df["country"] == country]
     if institution != "All":
-        out = out[out["institution_type"] == institution]
+        df = df[df["institution_type"] == institution]
     if interest != "All":
-        out = out[out["interest_level"].fillna("Unknown") == interest]
-    out = out[out["ai_rank_score"] >= min_score]
-    return out.reset_index(drop=True)
-
-
-def apply_site_filtering_local_filters(df: pd.DataFrame, search_term: str, exp_filter: list[str]) -> pd.DataFrame:
-    out = df.copy()
-    search_text = normalize_text_value(search_term).strip()
-    selected_exp = exp_filter if isinstance(exp_filter, list) else []
-
-    if search_text:
-        out = out[
-            out["site_name"].str.contains(search_text, case=False, na=False)
-            | out["matched_pi_name"].str.contains(search_text, case=False, na=False)
-            | out["site_id"].str.contains(search_text, case=False, na=False)
-        ]
-
-    if selected_exp:
-        keep = pd.Series(False, index=out.index)
-        if "High (10+ years)" in selected_exp:
-            keep |= out["pi_years_experience"].fillna(0) >= 10
-        if "Medium (5-10 years)" in selected_exp:
-            keep |= out["pi_years_experience"].fillna(0).between(5, 9.999)
-        if "Low (<5 years)" in selected_exp:
-            keep |= out["pi_years_experience"].fillna(0) < 5
-        out = out[keep]
-
-    return out.reset_index(drop=True)
-
-
-# Scope: globally filtered candidate pool plus Site Filtering local controls.
-def get_site_filtering_page_df(base_view: pd.DataFrame, search_term: str, exp_filter: list[str]) -> pd.DataFrame:
-    return apply_site_filtering_local_filters(base_view, search_term, exp_filter)
-
-
-# Scope: manual selections intersected with base_view; fallback to base_view when none selected.
-def get_feasibility_distribution_page_df(master_df: pd.DataFrame, base_view: pd.DataFrame) -> pd.DataFrame:
-    selected_ids = set(master_df.loc[master_df["manual_select"], "site_id"].astype(str).tolist())
-    if not selected_ids:
-        return base_view.head(12).copy().reset_index(drop=True)
-    return base_view[base_view["site_id"].astype(str).isin(selected_ids)].copy().reset_index(drop=True)
-
-
-# Scope: active response workflow cohort within global filters.
-def get_feasibility_responses_page_df(base_view: pd.DataFrame) -> pd.DataFrame:
-    active_mask = (
-        base_view["survey_sent"].fillna(False)
-        | base_view["response_received"].fillna(False)
-        | (base_view["days_open"].fillna(0) > 0)
-    )
-    return base_view[active_mask].copy().reset_index(drop=True)
-
-
-# Scope: globally filtered analysis cohort for select options and row retrieval.
-def get_feasibility_analysis_page_df(base_view: pd.DataFrame) -> pd.DataFrame:
-    return base_view.copy().reset_index(drop=True)
-
-
-# Scope: globally filtered qualification review cohort.
-def get_qualification_page_df(base_view: pd.DataFrame) -> pd.DataFrame:
-    return base_view.copy().reset_index(drop=True)
-
-
-# Scope: globally filtered final-decision cohort.
-def get_final_selection_page_df(base_view: pd.DataFrame) -> pd.DataFrame:
-    return base_view.copy().reset_index(drop=True)
+        df = df[df["interest_level"].fillna("Unknown") == interest]
+    df = df[df["ai_rank_score"] >= min_score]
+    return df.reset_index(drop=True)
 
 
 def render_page_filters(master_df: pd.DataFrame, key_prefix: str) -> dict:
@@ -1122,8 +1110,8 @@ def render_login_screen() -> None:
             st.caption("Demo users: admin/admin123 (Admin), cra_user/cra123 (CRA)")
 
 
-def build_chat_context(page_name: str, context_df: pd.DataFrame) -> str:
-    active_view = context_df.copy().reset_index(drop=True)
+def build_chat_context(page_name: str, master_df: pd.DataFrame, view_df: pd.DataFrame) -> str:
+    active_view = view_df if not view_df.empty else master_df
     top_rows = active_view.head(5)
     top_sites = []
     for row in top_rows.itertuples():
@@ -1133,16 +1121,16 @@ def build_chat_context(page_name: str, context_df: pd.DataFrame) -> str:
     if not top_sites:
         top_sites = ["- No sites available in current filtered view"]
 
-    sent = int(active_view["survey_sent"].sum()) if "survey_sent" in active_view.columns else 0
-    received = int(active_view["response_received"].sum()) if "response_received" in active_view.columns else 0
-    pending = int(((active_view["survey_sent"]) & (~active_view["response_received"])).sum()) if {"survey_sent", "response_received"}.issubset(active_view.columns) else 0
-    reminders = int(active_view["reminder_count"].sum()) if "reminder_count" in active_view.columns else 0
-    selected = int((active_view["final_status"] == "Selected").sum()) if "final_status" in active_view.columns else 0
-    backup = int((active_view["final_status"] == "Backup").sum()) if "final_status" in active_view.columns else 0
-    rejected = int((active_view["final_status"] == "Rejected").sum()) if "final_status" in active_view.columns else 0
-    high_match = int((active_view["ai_rank_score"] >= 85).sum()) if "ai_rank_score" in active_view.columns else 0
-    high_risk = int((active_view["risk_level"] == "High").sum()) if "risk_level" in active_view.columns else 0
-    avg_qualification = float(active_view["qualification_score"].mean()) if "qualification_score" in active_view.columns and not active_view.empty else 0.0
+    sent = int(master_df["survey_sent"].sum()) if "survey_sent" in master_df.columns else 0
+    received = int(master_df["response_received"].sum()) if "response_received" in master_df.columns else 0
+    pending = int(((master_df["survey_sent"]) & (~master_df["response_received"])).sum()) if {"survey_sent", "response_received"}.issubset(master_df.columns) else 0
+    reminders = int(master_df["reminder_count"].sum()) if "reminder_count" in master_df.columns else 0
+    selected = int((master_df["final_status"] == "Selected").sum()) if "final_status" in master_df.columns else 0
+    backup = int((master_df["final_status"] == "Backup").sum()) if "final_status" in master_df.columns else 0
+    rejected = int((master_df["final_status"] == "Rejected").sum()) if "final_status" in master_df.columns else 0
+    high_match = int((master_df["ai_rank_score"] >= 85).sum()) if "ai_rank_score" in master_df.columns else 0
+    high_risk = int((master_df["risk_level"] == "High").sum()) if "risk_level" in master_df.columns else 0
+    avg_qualification = float(master_df["qualification_score"].mean()) if "qualification_score" in master_df.columns and not master_df.empty else 0.0
 
     return "\n".join(
         [
@@ -1184,33 +1172,29 @@ def query_local_llm(prompt: str, context: str) -> str:
     return answer
 
 
-def chatbot_answer_fallback(query: str, context_df: pd.DataFrame) -> str:
+def chatbot_answer_fallback(query: str) -> str:
     q = query.lower()
-    scoped_df = context_df.copy().reset_index(drop=True)
-    if scoped_df.empty:
-        return "No sites are available in the current context. Adjust filters or navigate to a workflow page with data."
     if any(k in q for k in ["top", "best", "recommend"]):
-        top = scoped_df.iloc[0]
+        top = MASTER.iloc[0]
         return f"Top recommended site is {top['site_name']} in {top['country_label']} with AI match {int(top['ai_rank_score'])}% and feasibility {int(top['feasibility_score'])}/100."
     if "europe" in q:
-        europe = scoped_df[scoped_df["region"].str.contains("Europe", case=False, na=False)].head(5)
+        europe = MASTER[MASTER["region"].str.contains("Europe", case=False, na=False)].head(5)
         if europe.empty:
             return "No Europe sites are currently in the filtered view."
         lines = [f"{i+1}. {r.site_name} ({r.country_label}) – {int(r.ai_rank_score)}%" for i, r in enumerate(europe.itertuples())]
         return "Top European candidates right now:\n\n" + "\n".join(lines)
     if "qualification" in q or "cda" in q:
-        sel = int((scoped_df["final_status"] == "Selected").sum())
+        sel = int((MASTER["final_status"] == "Selected").sum())
         return f"There are {sel} currently selected sites. CDA status, CRA flags, preferred flags, and comments all persist back to CSV sidecar files."
     if "feasibility" in q:
-        sent = int(scoped_df["survey_sent"].sum())
-        recv = int(scoped_df["response_received"].sum())
-        breaches = int(((scoped_df["survey_sent"]) & (~scoped_df["response_received"]) & (scoped_df["days_open"] > 7)).sum())
-        return f"Feasibility dashboard shows {recv} received responses out of {sent} sent surveys, with {breaches} SLA breaches."
+        sent = int(MASTER["survey_sent"].sum())
+        recv = int(MASTER["response_received"].sum())
+        return f"Feasibility dashboard shows {recv} received responses out of {sent} sent surveys, with {int(((MASTER['survey_sent']) & (~MASTER['response_received']) & (MASTER['days_open'] > 7)).sum())} SLA breaches."
     return "I can answer questions about site ranking, feasibility, qualification, final selection, navigation, and CSV persistence."
 
 
-def chatbot_answer(query: str, page_name: str, context_df: pd.DataFrame) -> dict:
-    context = build_chat_context(page_name, context_df)
+def chatbot_answer(query: str, page_name: str, view_df: pd.DataFrame) -> dict:
+    context = build_chat_context(page_name, MASTER, view_df)
     try:
         answer = query_local_llm(query, context)
         return {
@@ -1222,7 +1206,7 @@ def chatbot_answer(query: str, page_name: str, context_df: pd.DataFrame) -> dict
         }
     except Exception as exc:
         return {
-            "response": chatbot_answer_fallback(query, context_df),
+            "response": chatbot_answer_fallback(query),
             "used_local_llm": False,
             "fallback_used": True,
             "success": False,
@@ -1296,9 +1280,15 @@ with st.sidebar:
     st.markdown("<div class='footer-note'>AI Status<br>Models are up to date. Last sync uses the local data folder and persisted app actions.</div>", unsafe_allow_html=True)
 
 if page in filter_enabled_pages:
-    base_view = apply_global_filters(MASTER, filters)
+    VIEW = filtered_master(
+        filters["region"],
+        filters["country"],
+        filters["institution"],
+        filters["interest"],
+        int(filters["min_ai_rank"]),
+    )
 else:
-    base_view = MASTER.copy().reset_index(drop=True)
+    VIEW = MASTER.copy().reset_index(drop=True)
 
 render_topbar(workflow_labels[page])
 render_flash_message()
@@ -1353,7 +1343,7 @@ if page == "Study Setup":
     with right:
         with st.container(border=True):
             st.markdown("<div class='section-head'>AI Feasibility Projection</div>", unsafe_allow_html=True)
-            conf = int(min(99, max(75, base_view["ai_rank_score"].head(30).mean() if not base_view.empty else 92)))
+            conf = int(min(99, max(75, VIEW["ai_rank_score"].head(30).mean() if not VIEW.empty else 92)))
             st.markdown(
                 f"<div class='metric-card'><div class='metric-label'>Estimated Model Confidence</div><div class='metric-value' style='font-size:48px'>{conf}%</div><div>Based on similar historical trials</div></div>",
                 unsafe_allow_html=True,
@@ -1373,44 +1363,45 @@ if page == "Study Setup":
 
 elif page == "Site Filtering":
     st.markdown("<div class='page-title'>AI Site Ranking & Filtering</div><div class='page-sub'>Review AI-recommended sites, adjust filters, and manually select final candidates for feasibility surveys.</div>", unsafe_allow_html=True)
-    site_filter_search_key = "site_filter_search"
-    site_filter_exp_key = "site_filter_pi_experience"
-    if site_filter_search_key not in st.session_state:
-        st.session_state[site_filter_search_key] = ""
-    if site_filter_exp_key not in st.session_state:
-        st.session_state[site_filter_exp_key] = ["High (10+ years)"]
-    search_term = normalize_text_value(st.session_state.get(site_filter_search_key, ""))
-    exp_filter = st.session_state.get(site_filter_exp_key, ["High (10+ years)"])
-    if not isinstance(exp_filter, list):
-        exp_filter = ["High (10+ years)"]
-    site_filter_df = get_site_filtering_page_df(base_view, search_term, exp_filter)
-
     metric_cards([
-        ("Total Sites Analyzed", f"{len(site_filter_df):,}", "dark"),
-        ("High Match Candidates", int((site_filter_df["ai_rank_score"] >= 85).sum()), "light"),
-        ("Avg. AI Match Score", f"{int(site_filter_df['ai_rank_score'].mean()) if not site_filter_df.empty else 0}%", "dark"),
-        ("Est. Enrollment Reach", int(site_filter_df["projected_enroll_rate_per_month"].fillna(0).head(25).sum()), "dark"),
+        ("Total Sites Analyzed", f"{len(VIEW):,}", "dark"),
+        ("High Match Candidates", int((VIEW["ai_rank_score"] >= 85).sum()), "light"),
+        ("Avg. AI Match Score", f"{int(VIEW['ai_rank_score'].mean()) if not VIEW.empty else 0}%", "dark"),
+        ("Est. Enrollment Reach", int(VIEW["projected_enroll_rate_per_month"].fillna(0).head(25).sum()), "dark"),
     ])
     left, right = st.columns([0.9, 1.25])
     with left:
         st.markdown("<div class='surface'><div class='section-head'>Global Distribution</div>", unsafe_allow_html=True)
-        map_df = site_filter_df.dropna(subset=["latitude", "longitude"]).copy()
+        map_df = VIEW.dropna(subset=["latitude", "longitude"]).copy()
         if not map_df.empty:
             fig = px.scatter_geo(map_df.head(200), lat="latitude", lon="longitude", size="ai_rank_score", hover_name="site_name", color="region")
             fig.update_layout(height=320, margin=dict(l=0, r=0, t=0, b=0), showlegend=False)
             st.plotly_chart(fig, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("<div class='surface'><div class='section-head'>Advanced Filters</div>", unsafe_allow_html=True)
-        st.text_input("Search sites", placeholder="Site name, PI, or ID", key=site_filter_search_key)
-        st.multiselect(
-            "PI experience",
-            ["High (10+ years)", "Medium (5-10 years)", "Low (<5 years)"],
-            key=site_filter_exp_key,
-        )
-        st.caption(f"Showing {len(site_filter_df)} sites from the current filtered cohort.")
+        search_term = st.text_input("Search sites", placeholder="Site name, PI, or ID")
+        exp_filter = st.multiselect("PI experience", ["High (10+ years)", "Medium (5-10 years)", "Low (<5 years)"], default=["High (10+ years)"])
+        if search_term:
+            result = VIEW[
+                VIEW["site_name"].str.contains(search_term, case=False, na=False)
+                | VIEW["matched_pi_name"].str.contains(search_term, case=False, na=False)
+                | VIEW["site_id"].str.contains(search_term, case=False, na=False)
+            ]
+        else:
+            result = VIEW.copy()
+        if exp_filter:
+            keep = pd.Series(False, index=result.index)
+            if "High (10+ years)" in exp_filter:
+                keep |= result["pi_years_experience"].fillna(0) >= 10
+            if "Medium (5-10 years)" in exp_filter:
+                keep |= result["pi_years_experience"].fillna(0).between(5, 9.999)
+            if "Low (<5 years)" in exp_filter:
+                keep |= result["pi_years_experience"].fillna(0) < 5
+            result = result[keep]
+        st.caption(f"Showing {len(result)} sites from the current filtered cohort.")
         st.markdown("</div>", unsafe_allow_html=True)
     with right:
-        display = site_filter_df[["site_id", "site_name", "country_label", "matched_pi_name", "pi_years_experience", "ai_rank_score", "risk_level", "manual_select"]].copy()
+        display = result[["site_id", "site_name", "country_label", "matched_pi_name", "pi_years_experience", "ai_rank_score", "risk_level", "manual_select"]].copy()
         display.columns = ["Site ID", "Site Details", "Location", "PI Info", "PI Experience", "AI Match Score", "Risk", "Select"]
         edited = st.data_editor(
             display,
@@ -1433,19 +1424,21 @@ elif page == "Site Filtering":
             set_flash_message(f"Proceed to Feasibility completed. Saved {len(selected_ids)} selected candidate sites.")
             st.session_state["page"] = "Feasibility Distribution"
             clear_and_rerun()
-        if not site_filter_df.empty:
+        if not result.empty:
             st.markdown("<div class='surface' style='margin-top:14px'><div class='section-head'>Explainable AI for top site</div>", unsafe_allow_html=True)
-            st.dataframe(ranking_explanation(site_filter_df.iloc[0]), hide_index=True, use_container_width=True)
+            st.dataframe(ranking_explanation(result.iloc[0]), hide_index=True, use_container_width=True)
             st.markdown("</div>", unsafe_allow_html=True)
 
 elif page == "Feasibility Distribution":
     st.markdown("<div class='page-title'>Feasibility Distribution</div><div class='page-sub'>Review the AI-ranked site list and configure survey distribution parameters with persisted send/reminder tracking.</div>", unsafe_allow_html=True)
-    distribution_df = get_feasibility_distribution_page_df(MASTER, base_view)
+    selected = MASTER[MASTER["manual_select"]].copy()
+    if selected.empty:
+        selected = VIEW.head(12).copy()
     metric_cards([
-        ("Total Selected", len(distribution_df), "dark"),
-        ("Pending Send", int((~distribution_df["survey_sent"]).sum()), "dark"),
-        ("Delivered", int(distribution_df["survey_sent"].sum()), "dark"),
-        ("Reminders", int(distribution_df["reminder_count"].sum()), "light"),
+        ("Total Selected", len(selected), "dark"),
+        ("Pending Send", int((~selected["survey_sent"]).sum()), "dark"),
+        ("Delivered", int(selected["survey_sent"].sum()), "dark"),
+        ("Reminders", int(selected["reminder_count"].sum()), "light"),
     ])
     left, right = st.columns([0.65, 1.45])
     with left:
@@ -1455,27 +1448,22 @@ elif page == "Feasibility Distribution":
         auto_include_top_10 = st.checkbox("Auto-include Top 10%", value=True)
         template = st.text_input("Survey Template", value=f"{TRIAL_TA}-{TRIAL_IND}-feasibility")
         if st.button("Apply Rules", use_container_width=True):
-            base = base_view[(base_view["ai_rank_score"] >= threshold) & (base_view["pi_years_experience"].fillna(0) >= min_trials)].copy()
+            base = MASTER[(MASTER["ai_rank_score"] >= threshold) & (MASTER["pi_years_experience"].fillna(0) >= min_trials)]
             if auto_include_top_10:
-                top_decile = base_view.head(max(1, int(len(base_view) * 0.10))).copy()
-                base = pd.concat([top_decile, base], ignore_index=True).drop_duplicates(subset=["site_id"], keep="first")
+                base = MASTER.head(max(1, int(len(MASTER) * 0.10))).combine_first(base)
             persist_bulk_site_action(MASTER["site_id"].tolist(), manual_select=False)
             persist_bulk_site_action(base["site_id"].tolist(), manual_select=True)
             set_flash_message(f"Apply Rules completed. Updated manual selections for {len(base)} sites.")
             clear_and_rerun()
-        chosen = st.multiselect(
-            "Distribution list",
-            options=distribution_df["site_name"].tolist(),
-            default=distribution_df["site_name"].head(8).tolist(),
-        )
+        chosen = st.multiselect("Distribution list", options=selected["site_name"].tolist(), default=selected["site_name"].head(8).tolist())
         if st.button("Send Feasibility Surveys", use_container_width=True):
-            ids = distribution_df[distribution_df["site_name"].isin(chosen)]["site_id"].tolist()
+            ids = selected[selected["site_name"].isin(chosen)]["site_id"].tolist()
             persist_distribution(ids, template)
             for sid in ids:
                 upsert_notification(sid, "Feasibility Survey Submitted", "Medium", f"Survey distributed using template {template}")
             set_flash_message(f"Send Feasibility Surveys completed. Distribution persisted for {len(ids)} sites.")
             clear_and_rerun()
-        pending_ids = distribution_df[(distribution_df["survey_sent"]) & (~distribution_df["response_received"])]["site_id"].tolist()
+        pending_ids = selected[(selected["survey_sent"]) & (~selected["response_received"])]["site_id"].tolist()
         if st.button("Send Reminders", use_container_width=True):
             persist_reminders(pending_ids)
             for sid in pending_ids:
@@ -1485,7 +1473,7 @@ elif page == "Feasibility Distribution":
         st.markdown("</div>", unsafe_allow_html=True)
     with right:
         st.markdown("<div class='surface-dark'><div class='section-head' style='color:#fff'>Ranked Sites for Feasibility</div>", unsafe_allow_html=True)
-        dist = distribution_df[["site_name", "site_id", "matched_pi_name", "country_label", "ai_rank_score", "survey_sent", "response_received", "reminder_count"]].copy()
+        dist = selected[["site_name", "site_id", "matched_pi_name", "country_label", "ai_rank_score", "survey_sent", "response_received", "reminder_count"]].copy()
         dist["Survey Status"] = dist.apply(lambda r: "Delivered" if r["response_received"] else "Sent" if r["survey_sent"] else "Pending", axis=1)
         dist["AI Match"] = dist["ai_rank_score"].astype(int)
         dist = dist[["site_name", "site_id", "matched_pi_name", "country_label", "AI Match", "Survey Status", "reminder_count"]]
@@ -1495,15 +1483,13 @@ elif page == "Feasibility Distribution":
 
 elif page == "Feasibility Responses":
     st.markdown("<div class='page-title'>Feasibility Responses</div><div class='page-sub'>Monitor survey response rates and identify bottlenecks in site evaluation.</div>", unsafe_allow_html=True)
-    responses_df = get_feasibility_responses_page_df(base_view)
-    sent = int(responses_df["survey_sent"].sum())
-    recv = int(responses_df["response_received"].sum())
-    pending = int(((responses_df["survey_sent"]) & (~responses_df["response_received"])).sum())
-    breaches = int(((responses_df["survey_sent"]) & (~responses_df["response_received"]) & (responses_df["days_open"] > 7)).sum())
+    sent = int(MASTER["survey_sent"].sum())
+    recv = int(MASTER["response_received"].sum())
+    breaches = ((MASTER["survey_sent"]) & (~MASTER["response_received"]) & (MASTER["days_open"] > 7)).sum()
     metric_cards([
         ("Total Surveys Sent", sent, "dark"),
         ("Response Rate", f"{round((recv/sent)*100) if sent else 0}%", "dark"),
-        ("Pending Responses", pending, "dark"),
+        ("Pending Responses", int(((MASTER["survey_sent"]) & (~MASTER["response_received"])).sum()), "dark"),
         ("SLA Breaches", int(breaches), "light"),
     ])
     c1, c2 = st.columns([0.8, 1.4])
@@ -1522,7 +1508,7 @@ elif page == "Feasibility Responses":
         fig.update_layout(height=320, margin=dict(l=10, r=10, t=10, b=10), barmode="stack")
         st.plotly_chart(fig, use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
-    tracking = responses_df[["site_name", "country_label", "response_received", "feasibility_score", "days_open", "reminder_count"]].copy()
+    tracking = MASTER[["site_name", "country_label", "response_received", "feasibility_score", "days_open", "reminder_count"]].copy()
     tracking["Status"] = tracking["response_received"].map({True: "Received", False: "Pending"})
     tracking.loc[(tracking["Status"] == "Pending") & (tracking["days_open"] > 7), "Status"] = "Overdue"
     tracking["Last Contact"] = tracking["days_open"].map(lambda d: f"{int(d)} days ago" if d else "Today")
@@ -1534,116 +1520,96 @@ elif page == "Feasibility Responses":
 
 elif page == "Feasibility Analysis":
     st.markdown("<div class='page-title'>Site Feasibility Analysis</div><div class='page-sub'>Drill into site-level detail with AI score explainability, PI context, and operational readiness signals.</div>", unsafe_allow_html=True)
-    analysis_df = get_feasibility_analysis_page_df(base_view)
-    if analysis_df.empty:
-        st.info("No sites available in the current filtered cohort for analysis.")
-    else:
-        site_options = analysis_df[["site_id", "site_name", "country_label"]].drop_duplicates(subset=["site_id"]).copy()
-        site_labels = {
-            r.site_id: f"{r.site_name} ({r.country_label})"
-            for r in site_options.itertuples(index=False)
-        }
-        selected_site_id = st.selectbox(
-            "Choose Site",
-            site_options["site_id"].tolist(),
-            format_func=lambda sid: site_labels.get(sid, sid),
-        )
-        row = analysis_df[analysis_df["site_id"] == selected_site_id].iloc[0]
-        st.markdown(f"<div class='surface-dark'><div style='display:flex;justify-content:space-between;align-items:center'><div><div style='font-size:22px;font-weight:800'>{row['site_name']}</div><div>{row['city']}, {row['country_label']}  •  PI: {row['matched_pi_name']}  •  Status: Feasibility {('Completed' if row['response_received'] else 'Pending')}</div></div><div style='font-size:46px;font-weight:800'>{int(row['ai_rank_score'])}<span style='font-size:18px'>/100</span></div></div></div>", unsafe_allow_html=True)
-        a, b = st.columns([1.35, 1.0])
-        with a:
-            st.markdown("<div class='surface'><div class='section-head'>Site Selection Parameters</div>", unsafe_allow_html=True)
-            score_df = pd.DataFrame({
-                "Dimension": [
-                    "Investigator and Site Qualification", "Patient recruitment feasibility", "Patient recruitment and management",
-                    "Site infrastructure and technologies", "Lab and operational capability", "Regulatory / IRB readiness", "Budgetary consideration"
-                ],
-                "Score": [
-                    round((row['pi_years_experience'] or 0) / 2, 1), round((row['projected_enroll_rate_per_month'] or 0), 1),
-                    round((row['retention_rate'] or 0) * 10, 1), round(10 - min((row['data_entry_lag_days'] or 0), 10), 1),
-                    round(10 - min((row['screen_fail_rate'] or 0) * 20, 10), 1), round(8 + row['central_irb_preferred'] * 1.5, 1), round(8.0, 1)
-                ]
-            })
-            st.dataframe(score_df, use_container_width=True, hide_index=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-        with b:
-            st.markdown("<div class='surface'><div class='section-head'>AI Score Breakdown</div>", unsafe_allow_html=True)
-            g = go.Figure(go.Indicator(mode="gauge+number", value=float(row["feasibility_score"]), title={"text": "Feasibility Score"}, gauge={"axis": {"range": [0,100]}}))
-            g.update_layout(height=260, margin=dict(l=10, r=10, t=40, b=10))
-            st.plotly_chart(g, use_container_width=True)
-            st.dataframe(ranking_explanation(row), use_container_width=True, hide_index=True)
-            st.markdown("</div>", unsafe_allow_html=True)
+    site_name = st.selectbox("Choose Site", VIEW["site_name"].tolist() if not VIEW.empty else MASTER["site_name"].tolist())
+    row = MASTER[MASTER["site_name"] == site_name].iloc[0]
+    st.markdown(f"<div class='surface-dark'><div style='display:flex;justify-content:space-between;align-items:center'><div><div style='font-size:22px;font-weight:800'>{row['site_name']}</div><div>{row['city']}, {row['country_label']}  •  PI: {row['matched_pi_name']}  •  Status: Feasibility {('Completed' if row['response_received'] else 'Pending')}</div></div><div style='font-size:46px;font-weight:800'>{int(row['ai_rank_score'])}<span style='font-size:18px'>/100</span></div></div></div>", unsafe_allow_html=True)
+    a, b = st.columns([1.35, 1.0])
+    with a:
+        st.markdown("<div class='surface'><div class='section-head'>Site Selection Parameters</div>", unsafe_allow_html=True)
+        score_df = pd.DataFrame({
+            "Dimension": [
+                "Investigator and Site Qualification", "Patient recruitment feasibility", "Patient recruitment and management",
+                "Site infrastructure and technologies", "Lab and operational capability", "Regulatory / IRB readiness", "Budgetary consideration"
+            ],
+            "Score": [
+                round((row['pi_years_experience'] or 0) / 2, 1), round((row['projected_enroll_rate_per_month'] or 0), 1),
+                round((row['retention_rate'] or 0) * 10, 1), round(10 - min((row['data_entry_lag_days'] or 0), 10), 1),
+                round(10 - min((row['screen_fail_rate'] or 0) * 20, 10), 1), round(8 + row['central_irb_preferred'] * 1.5, 1), round(8.0, 1)
+            ]
+        })
+        st.dataframe(score_df, use_container_width=True, hide_index=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+    with b:
+        st.markdown("<div class='surface'><div class='section-head'>AI Score Breakdown</div>", unsafe_allow_html=True)
+        g = go.Figure(go.Indicator(mode="gauge+number", value=float(row["feasibility_score"]), title={"text": "Feasibility Score"}, gauge={"axis": {"range": [0,100]}}))
+        g.update_layout(height=260, margin=dict(l=10, r=10, t=40, b=10))
+        st.plotly_chart(g, use_container_width=True)
+        st.dataframe(ranking_explanation(row), use_container_width=True, hide_index=True)
+        st.markdown("</div>", unsafe_allow_html=True)
 
 elif page == "Qualification":
     st.markdown("<div class='page-title'>Site Qualification Review</div><div class='page-sub'>Review top-level site details, CDA state, CRA flags, and preferred or backup decisions.</div>", unsafe_allow_html=True)
-    qualification_df = get_qualification_page_df(base_view)
-    if qualification_df.empty:
-        st.info("No sites available in the current filtered cohort for qualification review.")
-    else:
-        current = qualification_df.iloc[0]
-        st.markdown(f"<div class='surface-dark'><div style='display:flex;justify-content:space-between;align-items:center;gap:12px'><div><div style='font-size:18px'>Score {int(current['qualification_score'])}</div><div style='font-size:20px;font-weight:800'>{current['site_name']}</div><div>{current['city']}, {current['country_label']}  •  {current['matched_pi_name']}  •  CDA {current['cda_status']}</div></div><div style='min-width:340px'></div></div></div>", unsafe_allow_html=True)
-        q_df = qualification_df[["site_id", "site_name", "matched_pi_name", "cda_status", "cra_flag", "qualification_score", "preferred"]].copy()
-        q_df.columns = ["Site ID", "Facility Name", "Investigator", "CDA Status", "CRA Assigned", "Overall Score", "Preferred"]
-        edited_q = st.data_editor(
-            q_df,
-            use_container_width=True,
-            hide_index=True,
-            disabled=["Site ID", "Facility Name", "Investigator", "Overall Score"],
-            column_config={
-                "Preferred": st.column_config.CheckboxColumn("Mark Preferred"),
-                "CDA Status": st.column_config.SelectboxColumn("CDA Status", options=["Pending", "In Review", "Executed"]),
-                "CRA Assigned": st.column_config.SelectboxColumn("CRA Flag", options=["None", "Risk", "IRB Review", "Feasibility Delay", "Documentation"]),
-            },
-            key="qualification_edit",
-        )
-        c1, c2 = st.columns([1.3, 0.9])
-        with c1:
-            if st.button("Save Qualification Updates", use_container_width=True):
-                for _, r in edited_q.iterrows():
-                    persist_site_action(r["Site ID"], preferred=bool(r["Preferred"]), cda_status_override=r["CDA Status"], cra_flag_override=r["CRA Assigned"])
-                    append_audit("qualification_update", "site", r["Site ID"], f"CDA={r['CDA Status']}; CRA={r['CRA Assigned']}; preferred={r['Preferred']}")
-                set_flash_message("Save Qualification Updates completed. Qualification changes were persisted.")
-                clear_and_rerun()
-        with c2:
-            target_site = st.selectbox("CRA comment site", qualification_df["site_name"].tolist())
-            sid = qualification_df.loc[qualification_df["site_name"] == target_site, "site_id"].iloc[0]
-            default_comment = qualification_df.loc[qualification_df["site_id"] == sid, "cra_comment"].fillna("").iloc[0]
-            comment = st.text_area("CRA Comment", value=default_comment, height=110)
-            if st.button("Save CRA Comment", use_container_width=True):
-                persist_site_action(sid, cra_comment=comment)
-                upsert_notification(sid, "Action Required: Qualification Review", "Medium", comment[:140] or "Qualification review updated")
-                append_audit("cra_comment", "site", sid, comment[:140])
-                set_flash_message("Save CRA Comment completed. Comment and notification were saved.")
-                clear_and_rerun()
+    selected_pool = MASTER.head(10).copy()
+    current = selected_pool.iloc[0]
+    st.markdown(f"<div class='surface-dark'><div style='display:flex;justify-content:space-between;align-items:center;gap:12px'><div><div style='font-size:18px'>Score {int(current['qualification_score'])}</div><div style='font-size:20px;font-weight:800'>{current['site_name']}</div><div>{current['city']}, {current['country_label']}  •  {current['matched_pi_name']}  •  CDA {current['cda_status']}</div></div><div style='min-width:340px'></div></div></div>", unsafe_allow_html=True)
+    q_df = MASTER[["site_id", "site_name", "matched_pi_name", "cda_status", "cra_flag", "qualification_score", "preferred"]].copy()
+    q_df.columns = ["Site ID", "Facility Name", "Investigator", "CDA Status", "CRA Assigned", "Overall Score", "Preferred"]
+    edited_q = st.data_editor(
+        q_df,
+        use_container_width=True,
+        hide_index=True,
+        disabled=["Site ID", "Facility Name", "Investigator", "Overall Score"],
+        column_config={
+            "Preferred": st.column_config.CheckboxColumn("Mark Preferred"),
+            "CDA Status": st.column_config.SelectboxColumn("CDA Status", options=["Pending", "In Review", "Executed"]),
+            "CRA Assigned": st.column_config.SelectboxColumn("CRA Flag", options=["None", "Risk", "IRB Review", "Feasibility Delay", "Documentation"]),
+        },
+        key="qualification_edit",
+    )
+    c1, c2 = st.columns([1.3, 0.9])
+    with c1:
+        if st.button("Save Qualification Updates", use_container_width=True):
+            for _, r in edited_q.iterrows():
+                persist_site_action(r["Site ID"], preferred=bool(r["Preferred"]), cda_status_override=r["CDA Status"], cra_flag_override=r["CRA Assigned"])
+                append_audit("qualification_update", "site", r["Site ID"], f"CDA={r['CDA Status']}; CRA={r['CRA Assigned']}; preferred={r['Preferred']}")
+            set_flash_message("Save Qualification Updates completed. Qualification changes were persisted.")
+            clear_and_rerun()
+    with c2:
+        target_site = st.selectbox("CRA comment site", MASTER["site_name"].tolist())
+        sid = MASTER.loc[MASTER["site_name"] == target_site, "site_id"].iloc[0]
+        default_comment = MASTER.loc[MASTER["site_id"] == sid, "cra_comment"].fillna("").iloc[0]
+        comment = st.text_area("CRA Comment", value=default_comment, height=110)
+        if st.button("Save CRA Comment", use_container_width=True):
+            persist_site_action(sid, cra_comment=comment)
+            upsert_notification(sid, "Action Required: Qualification Review", "Medium", comment[:140] or "Qualification review updated")
+            append_audit("cra_comment", "site", sid, comment[:140])
+            set_flash_message("Save CRA Comment completed. Comment and notification were saved.")
+            clear_and_rerun()
 
 elif page == "Final Selection":
     st.markdown("<div class='page-title'>Final Selection</div><div class='page-sub'>Review and finalize the AI-recommended roster, capture justifications, and export stakeholder-ready outputs.</div>", unsafe_allow_html=True)
-    final_selection_df = get_final_selection_page_df(base_view)
     metric_cards([
-        ("Selected Sites", f"{int((final_selection_df['final_status'] == 'Selected').sum())}/{max(1, len(final_selection_df.head(35)))}", "dark"),
-        ("Projected Enrollment", int(final_selection_df[final_selection_df['final_status'] != 'Rejected']['projected_enroll_rate_per_month'].fillna(0).sum()), "dark"),
+        ("Selected Sites", f"{int((MASTER['final_status'] == 'Selected').sum())}/{max(1, len(MASTER.head(35)))}", "dark"),
+        ("Projected Enrollment", int(MASTER[MASTER['final_status'] != 'Rejected']['projected_enroll_rate_per_month'].fillna(0).sum()), "dark"),
         ("Est. Study Duration", "18 months", "dark"),
-        ("Overall AI Confidence", f"{int(final_selection_df['ai_rank_score'].head(20).mean()) if not final_selection_df.empty else 94}%", "dark"),
+        ("Overall AI Confidence", f"{int(MASTER['ai_rank_score'].head(20).mean()) if not MASTER.empty else 94}%", "dark"),
     ])
     left, right = st.columns([1.65, 0.8])
     with left:
         st.markdown("<div class='surface-dark'><div class='section-head' style='color:#fff'>Selected & Backup Sites</div>", unsafe_allow_html=True)
-        final = final_selection_df[["site_id", "site_name", "country_label", "qualification_score", "final_status", "selection_justification"]].copy()
+        final = MASTER[["site_id", "site_name", "country_label", "qualification_score", "final_status", "selection_justification"]].copy()
         final.columns = ["Site ID", "Name", "Location", "Final Score", "Status", "AI Justification"]
         st.dataframe(final.head(20), use_container_width=True, hide_index=True)
         st.markdown("</div>", unsafe_allow_html=True)
-        if final_selection_df.empty:
-            st.info("No sites available in the current filtered cohort for final selection.")
-        else:
-            target = st.selectbox("Site for final decision", final_selection_df["site_name"].tolist())
-            sid = final_selection_df.loc[final_selection_df["site_name"] == target, "site_id"].iloc[0]
-            reason = st.text_area("Selection justification", value=final_selection_df.loc[final_selection_df["site_id"] == sid, "selection_justification"].fillna("").iloc[0] or "Strong protocol fit, favorable feasibility, and operational readiness.")
-            status = st.selectbox("Final status override", ["", "Selected", "Backup", "Rejected"])
-            if st.button("Approve Roster / Save Decision", use_container_width=True):
-                persist_site_action(sid, selection_justification=reason, final_status_override=status)
-                append_audit("final_decision", "site", sid, f"status={status or 'auto'}")
-                set_flash_message("Approve Roster / Save Decision completed. Final site decision was saved.")
-                clear_and_rerun()
+        target = st.selectbox("Site for final decision", MASTER["site_name"].tolist())
+        sid = MASTER.loc[MASTER["site_name"] == target, "site_id"].iloc[0]
+        reason = st.text_area("Selection justification", value=MASTER.loc[MASTER["site_id"] == sid, "selection_justification"].fillna("").iloc[0] or "Strong protocol fit, favorable feasibility, and operational readiness.")
+        status = st.selectbox("Final status override", ["", "Selected", "Backup", "Rejected"])
+        if st.button("Approve Roster / Save Decision", use_container_width=True):
+            persist_site_action(sid, selection_justification=reason, final_status_override=status)
+            append_audit("final_decision", "site", sid, f"status={status or 'auto'}")
+            set_flash_message("Approve Roster / Save Decision completed. Final site decision was saved.")
+            clear_and_rerun()
     with right:
         st.markdown("<div class='surface'><div class='section-head'>Recent Activity</div>", unsafe_allow_html=True)
         audit_tail = load_or_init("audit_log.csv", ["timestamp", "action", "entity_type", "entity_id", "details"]).tail(8).iloc[::-1]
@@ -1654,7 +1620,7 @@ elif page == "Final Selection":
                 st.markdown(f"**{r['action'].replace('_', ' ').title()}**  ")
                 st.caption(f"{r['entity_id']} • {r['timestamp']}")
         st.markdown("</div>", unsafe_allow_html=True)
-        export_df = final_selection_df[["site_id", "site_name", "country_label", "ai_rank_score", "feasibility_score", "qualification_score", "final_status", "selection_justification"]]
+        export_df = MASTER[["site_id", "site_name", "country_label", "ai_rank_score", "feasibility_score", "qualification_score", "final_status", "selection_justification"]]
         st.download_button("Export Excel Matrix (CSV)", export_df.to_csv(index=False).encode("utf-8"), file_name="selected_sites_export.csv", mime="text/csv", use_container_width=True)
         st.download_button("Export Audit Log", load_or_init("audit_log.csv", ["timestamp", "action", "entity_type", "entity_id", "details"]).to_csv(index=False).encode("utf-8"), file_name="audit_log.csv", mime="text/csv", use_container_width=True)
 
@@ -1681,8 +1647,8 @@ elif page == "Chatbot Assistance":
             st.session_state.chat_history.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.write(prompt)
-            answer_payload = chatbot_answer(prompt, page, base_view)
-            answer_text = normalize_text_value(answer_payload.get("response", "")).strip() or chatbot_answer_fallback(prompt, base_view)
+            answer_payload = chatbot_answer(prompt, page, VIEW)
+            answer_text = normalize_text_value(answer_payload.get("response", "")).strip() or chatbot_answer_fallback(prompt)
             st.session_state.chat_history.append({"role": "assistant", "content": answer_text})
             with st.chat_message("assistant"):
                 st.write(answer_text)
@@ -1735,3 +1701,151 @@ elif page == "CRA Notifications":
                 st.caption(str(note["created_at"]))
 
 st.caption(f"Using local data folder: {DATA_DIR}")
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\README.md
+================================================================================
+
+# AI Smart Site Selection - Streamlit Demo
+
+A demo Streamlit app for an AI-driven clinical trial smart site selection workflow.
+
+## What is included
+- 8 workflow screens matching the uploaded wireframe
+- mock AI ranking and explainability
+- feasibility distribution and response tracking
+- site feasibility deep-dive
+- qualification workflow with CDA + CRA flags
+- final site selection summary with export buttons
+- chatbot panel
+- CRA notifications center
+
+## Run locally
+```bash
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+## Notes
+- This is a frontend-heavy demo with seeded mock data.
+- Export to Excel currently downloads CSV for simplicity.
+- PDF export is stubbed as a text summary and can be replaced with ReportLab or WeasyPrint later.
+- Best next step: split into multipage modules and connect to real APIs / database.
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\requirements.txt
+================================================================================
+
+streamlit>=1.37.0
+pandas>=2.2.2
+numpy>=1.26.4
+plotly>=5.22.0
+requests>=2.32.0
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\audit_log.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\chat_usage.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\feasibility_responses_new_trial.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\notifications.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\principal_investigators.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\README.md
+================================================================================
+
+{
+  "about": "Synthetic dataset for Clinical Trial Site Selection incl. PIs and site performance",
+  "version": "v1",
+  "new_trial": {
+    "therapeutic_area": "Oncology",
+    "indication": "NSCLC",
+    "phase": "III"
+  },
+  "files": [
+    "sites.csv",
+    "principal_investigators.csv",
+    "site_performance_history.csv",
+    "feasibility_responses_new_trial.csv",
+    "recommended_top_sites.csv"
+  ],
+  "scoring_weights": {
+    "avg_enroll_rate_per_month_scaled": 0.35,
+    "screen_fail_rate_scaled": -0.15,
+    "protocol_deviation_rate_scaled": -0.15,
+    "data_entry_lag_days_scaled": -0.1,
+    "retention_rate_scaled": 0.25,
+    "competing_trials_same_ta_scaled": -0.1
+  }
+}
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\recommended_top_sites.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\sites.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\site_actions.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\site_performance_history.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\survey_tracking.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
+
+
+================================================================================
+FILE: C:\Users\Abel.george\Downloads\SmartSite\data\users.csv
+================================================================================
+
+[Skipped: Binary or unsupported file type]
