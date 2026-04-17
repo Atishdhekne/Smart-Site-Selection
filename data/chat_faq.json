@@ -1,0 +1,435 @@
+{
+  "version": "1.0",
+  "intents": [
+    {
+      "intent_id": "nav_01_go_site_filtering",
+      "category": "Navigation/workflow",
+      "patterns": ["go to site filtering", "open site filtering", "navigate to site filtering", "take me to ai site ranking", "open ranking page", "go to site ranking"],
+      "aliases": ["site filtering page", "site ranking"],
+      "keywords": ["navigate", "site", "filtering", "ranking"],
+      "response": "Use the sidebar Workflow menu and open Site Filtering to review ranked sites and adjust study filters.",
+      "actions": [{"label": "Open Site Filtering", "type": "navigate", "target": "Site Filtering"}]
+    },
+    {
+      "intent_id": "nav_02_go_feasibility_distribution",
+      "category": "Navigation/workflow",
+      "patterns": ["go to feasibility distribution", "open feasibility distribution", "navigate to survey distribution", "open survey distribution page"],
+      "aliases": ["distribution page", "survey send page"],
+      "keywords": ["navigate", "feasibility", "distribution", "survey"],
+      "response": "Feasibility Distribution is where surveys are sent and reminder cadence is managed.",
+      "actions": [{"label": "Open Feasibility Distribution", "type": "navigate", "target": "Feasibility Distribution"}]
+    },
+    {
+      "intent_id": "nav_03_go_feasibility_responses",
+      "category": "Navigation/workflow",
+      "patterns": ["go to feasibility responses", "open feasibility responses", "show response tracking", "open response tracker"],
+      "aliases": ["response page", "feasibility tracker"],
+      "keywords": ["navigate", "feasibility", "responses", "tracking"],
+      "response": "Feasibility Responses shows sent vs received status, reminder count, and response trends.",
+      "actions": [{"label": "Open Feasibility Responses", "type": "navigate", "target": "Feasibility Responses"}]
+    },
+    {
+      "intent_id": "nav_04_go_feasibility_analysis",
+      "category": "Navigation/workflow",
+      "patterns": ["go to feasibility analysis", "open site feasibility analysis", "navigate to feasibility analysis", "open analysis page"],
+      "aliases": ["feasibility analysis page", "risk analysis page"],
+      "keywords": ["navigate", "feasibility", "analysis", "risk"],
+      "response": "Feasibility Analysis provides site level detail with risk and score explainability.",
+      "actions": [{"label": "Open Feasibility Analysis", "type": "navigate", "target": "Feasibility Analysis"}]
+    },
+    {
+      "intent_id": "nav_05_go_qualification",
+      "category": "Navigation/workflow",
+      "patterns": ["go to qualification", "open qualification page", "navigate to site qualification", "take me to qualification"],
+      "aliases": ["qualification tab", "qualification workflow"],
+      "keywords": ["navigate", "qualification", "cda", "cra"],
+      "response": "Qualification is used to review CDA state, CRA flags, and preferred status before final decisions.",
+      "actions": [{"label": "Open Qualification", "type": "navigate", "target": "Qualification"}]
+    },
+    {
+      "intent_id": "nav_06_go_final_selection",
+      "category": "Navigation/workflow",
+      "patterns": ["go to final selection", "open final selection", "navigate to roster decision", "open roster page"],
+      "aliases": ["final roster", "selection page"],
+      "keywords": ["navigate", "final", "selection", "roster"],
+      "response": "Final Selection consolidates selected backup rejected decisions and export outputs.",
+      "actions": [{"label": "Open Final Selection", "type": "navigate", "target": "Final Selection"}]
+    },
+    {
+      "intent_id": "nav_07_go_notifications",
+      "category": "Navigation/workflow",
+      "patterns": ["go to notifications", "open cra notifications", "navigate to notification center", "open alerts"],
+      "aliases": ["notification page", "alerts page"],
+      "keywords": ["navigate", "notification", "alerts", "cra"],
+      "response": "CRA Notifications contains pending and acknowledged operational alerts.",
+      "actions": [{"label": "Open Notification Center", "type": "navigate", "target": "CRA Notifications"}]
+    },
+    {
+      "intent_id": "nav_08_workflow_overview",
+      "category": "Navigation/workflow",
+      "patterns": ["workflow overview", "show workflow steps", "what is the process flow"],
+      "response": "Workflow sequence is Study Setup, Site Filtering, Feasibility Distribution, Feasibility Responses, Feasibility Analysis, Qualification, Final Selection, and CRA Notifications."
+    },
+    {
+      "intent_id": "nav_09_current_context_scope",
+      "category": "Navigation/workflow",
+      "patterns": ["what is my current context", "current scope", "which scope is active", "how many rows are in scope"],
+      "aliases": ["scope summary", "scope rows"],
+      "keywords": ["scope", "context", "rows", "active"],
+      "handler": "handle_current_context_scope"
+    },
+    {
+      "intent_id": "nav_10_new_chat_guidance",
+      "category": "Navigation/workflow",
+      "patterns": ["start new chat", "reset conversation", "new chat session"],
+      "response": "Use New Chat in the left panel to start a fresh deterministic conversation for the selected scope."
+    },
+    {
+      "intent_id": "nav_11_capability_help",
+      "category": "Navigation/workflow",
+      "patterns": ["what can you do", "help me with chatbot", "show chatbot capabilities"],
+      "aliases": ["chat help", "assistant help"],
+      "keywords": ["help", "capabilities", "chatbot", "assistant"],
+      "response": "I provide deterministic support for ranking, feasibility, qualification, final selection, notifications, and workflow navigation.",
+      "follow_up_prompts": ["show top ranked sites", "pending feasibility responses", "qualification summary", "notification summary"]
+    },
+
+    {
+      "intent_id": "ranking_01_top_sites",
+      "category": "Ranking/scoring",
+      "patterns": ["show top sites", "top ranked sites", "best sites now", "which sites are best", "show strongest sites"],
+      "aliases": ["best ranked sites", "top candidates"],
+      "keywords": ["top", "ranked", "sites", "best"],
+      "handler": "handle_top_sites",
+      "actions": [{"label": "View Qualification Details", "type": "navigate", "target": "Qualification"}],
+      "follow_up_prompts": ["top sites in europe", "high risk sites"]
+    },
+    {
+      "intent_id": "ranking_02_top_sites_europe",
+      "category": "Ranking/scoring",
+      "patterns": ["top sites in europe", "europe top ranked sites", "best european sites", "best sites in eu"],
+      "aliases": ["europe shortlist", "eu top sites"],
+      "keywords": ["top", "europe", "eu", "sites"],
+      "handler": "handle_top_sites_europe",
+      "actions": [{"label": "Open Site Filtering", "type": "navigate", "target": "Site Filtering"}]
+    },
+    {
+      "intent_id": "ranking_03_ai_rank_score",
+      "category": "Ranking/scoring",
+      "patterns": ["how is ai rank score calculated", "ai rank score formula", "explain ai ranking", "explain ai match score", "what is ai match score"],
+      "response": "AI rank score derives from persisted site selection scoring inputs and is normalized to a 0 to 100 range for ranking and tie break decisions."
+    },
+    {
+      "intent_id": "ranking_04_feasibility_score",
+      "category": "Ranking/scoring",
+      "patterns": ["how is feasibility score calculated", "feasibility score formula", "explain feasibility scoring", "explain feasibility score", "what is feasibility score"],
+      "response": "Feasibility score blends interest level, startup speed, projected enrollment, retention, and IRB preference into a deterministic 0 to 100 measure."
+    },
+    {
+      "intent_id": "ranking_05_qualification_score",
+      "category": "Ranking/scoring",
+      "patterns": ["how is qualification score calculated", "qualification score formula", "explain qualification scoring", "explain qualification score", "what is qualification score"],
+      "response": "Qualification score combines AI rank, feasibility score, PI experience, and audit finding penalties to prioritize operational readiness."
+    },
+    {
+      "intent_id": "ranking_06_high_risk_sites",
+      "category": "Ranking/scoring",
+      "patterns": ["high risk sites", "show risky sites", "sites with risk flag", "flagged risky sites"],
+      "aliases": ["risky candidates", "risk flags"],
+      "keywords": ["high", "risk", "flagged", "cra"],
+      "handler": "handle_high_risk_sites"
+    },
+    {
+      "intent_id": "ranking_07_investigator_lookup",
+      "category": "Ranking/scoring",
+      "patterns": ["investigator lookup", "who is the pi", "find pi details", "investigator for site"],
+      "aliases": ["pi lookup", "principal investigator details"],
+      "keywords": ["investigator", "pi", "site", "experience"],
+      "handler": "handle_investigator_lookup"
+    },
+    {
+      "intent_id": "ranking_08_tiebreakers",
+      "category": "Ranking/scoring",
+      "patterns": ["ranking tiebreakers", "how are ties resolved", "tie break rules"],
+      "response": "When scores are close, ranking remains deterministic by ordering on AI rank then feasibility then qualification within the scoped dataset."
+    },
+    {
+      "intent_id": "ranking_09_threshold_guidance",
+      "category": "Ranking/scoring",
+      "patterns": ["recommended ai threshold", "minimum ai score", "what threshold should i use"],
+      "response": "Use the sidebar Min AI Match filter to tighten or widen candidate scope. Higher thresholds improve focus but reduce cohort size."
+    },
+
+    {
+      "intent_id": "study_01_current_study_context",
+      "category": "Study setup/protocol",
+      "patterns": ["current study context", "show active protocol context", "what trial is active", "show active setup"],
+      "aliases": ["protocol context", "active study settings"],
+      "keywords": ["study", "context", "protocol", "setup"],
+      "handler": "handle_current_study_context"
+    },
+    {
+      "intent_id": "study_02_update_trial_context",
+      "category": "Study setup/protocol",
+      "patterns": ["how to update study setup", "edit protocol settings", "change trial context"],
+      "response": "Open Study Setup to update protocol context values. Saved changes refresh downstream ranking and feasibility views."
+    },
+    {
+      "intent_id": "study_03_required_fields",
+      "category": "Study setup/protocol",
+      "patterns": ["required study setup fields", "which protocol fields matter", "mandatory setup inputs"],
+      "response": "Core setup fields include therapeutic area, indication, phase, and enrollment target, with optional constraints for geography and biomarker strategy."
+    },
+    {
+      "intent_id": "study_04_phase_impact",
+      "category": "Study setup/protocol",
+      "patterns": ["phase impact on matching", "does trial phase affect ranking", "phase effect"],
+      "response": "Trial phase is part of context matching and can alter the scoped evidence used for scoring and feasibility alignment."
+    },
+    {
+      "intent_id": "study_05_geography_impact",
+      "category": "Study setup/protocol",
+      "patterns": ["target geographies effect", "geography impact", "regional targeting setup"],
+      "response": "Target geographies guide strategy and should align with site filters to keep rankings and feasibility analysis geographically consistent."
+    },
+    {
+      "intent_id": "study_06_biomarker_impact",
+      "category": "Study setup/protocol",
+      "patterns": ["biomarker requirement impact", "require biomarker testing", "biomarker setup meaning"],
+      "response": "Biomarker requirement informs study context and helps teams interpret operational fit for candidate sites and investigators."
+    },
+    {
+      "intent_id": "study_07_rare_disease_impact",
+      "category": "Study setup/protocol",
+      "patterns": ["rare disease protocol impact", "rare disease setting", "rare disease workflow"],
+      "response": "Rare disease settings typically narrow candidate pools, so monitor scope row count while adjusting filters and thresholds."
+    },
+    {
+      "intent_id": "study_08_competitive_density",
+      "category": "Study setup/protocol",
+      "patterns": ["competitive trial density tolerance", "competition tolerance setting", "how to set competing trial tolerance"],
+      "response": "Competitive trial density tolerance helps interpret risk tradeoffs in screening and should be reviewed alongside high risk site outputs."
+    },
+
+    {
+      "intent_id": "feasibility_01_pending_responses",
+      "category": "Feasibility workflow",
+      "patterns": ["pending feasibility responses", "who has not responded", "pending survey responses", "non responders"],
+      "aliases": ["pending response count", "outstanding responses"],
+      "keywords": ["pending", "feasibility", "responses", "survey"],
+      "handler": "handle_pending_feasibility_responses",
+      "actions": [{"label": "Open Feasibility Responses", "type": "navigate", "target": "Feasibility Responses"}],
+      "follow_up_prompts": ["sla breach sites", "go to feasibility responses"]
+    },
+    {
+      "intent_id": "feasibility_02_sla_breaches",
+      "category": "Feasibility workflow",
+      "patterns": ["sla breach sites", "sites beyond sla", "feasibility delay breaches", "survey delays over sla"],
+      "aliases": ["sla delays", "breach list"],
+      "keywords": ["sla", "breach", "delay", "feasibility"],
+      "handler": "handle_sla_breach_sites",
+      "actions": [{"label": "Open CRA Notifications", "type": "navigate", "target": "CRA Notifications"}]
+    },
+    {
+      "intent_id": "feasibility_03_distribution_overview",
+      "category": "Feasibility workflow",
+      "patterns": ["feasibility distribution overview", "survey distribution overview", "distribution workflow summary"],
+      "response": "Feasibility Distribution supports batch outreach, send status tracking, and reminder initiation with persisted sidecar updates."
+    },
+    {
+      "intent_id": "feasibility_04_send_guidance",
+      "category": "Feasibility workflow",
+      "patterns": ["how to send survey", "send feasibility survey", "distribute surveys"],
+      "response": "Use Feasibility Distribution to select recipients and trigger survey send actions. Sent status and timestamps persist to tracking data."
+    },
+    {
+      "intent_id": "feasibility_05_reminder_guidance",
+      "category": "Feasibility workflow",
+      "patterns": ["how to send reminder", "reminder workflow", "follow up non responders"],
+      "response": "Reminder actions increment reminder count and keep response monitoring deterministic in Feasibility Responses."
+    },
+    {
+      "intent_id": "feasibility_06_response_rate",
+      "category": "Feasibility workflow",
+      "patterns": ["response rate summary", "feasibility response rate", "survey completion rate"],
+      "response": "Response rate is tracked as received over sent within the selected scope and is visible in Feasibility Responses charts and metrics."
+    },
+    {
+      "intent_id": "feasibility_07_bottleneck_checks",
+      "category": "Feasibility workflow",
+      "patterns": ["feasibility bottlenecks", "why are responses delayed", "response bottleneck checks"],
+      "response": "Check days open, reminder count, and CRA flags to identify bottlenecks. SLA breach outputs help prioritize intervention."
+    },
+    {
+      "intent_id": "feasibility_08_scope_alignment",
+      "category": "Feasibility workflow",
+      "patterns": ["feasibility context scope", "which rows are used for feasibility", "scope for response metrics"],
+      "handler": "handle_current_context_scope"
+    },
+
+    {
+      "intent_id": "qualification_01_summary",
+      "category": "Qualification",
+      "patterns": ["qualification summary", "summarize qualification", "qualification overview", "qualification status"],
+      "aliases": ["qualification readout", "cda and cra summary"],
+      "keywords": ["qualification", "summary", "cda", "cra", "preferred"],
+      "handler": "handle_qualification_summary",
+      "actions": [{"label": "Open Qualification", "type": "navigate", "target": "Qualification"}]
+    },
+    {
+      "intent_id": "qualification_02_selected_summary",
+      "category": "Qualification",
+      "patterns": ["selected sites summary", "how many selected sites", "selected status summary"],
+      "handler": "handle_selected_sites_summary"
+    },
+    {
+      "intent_id": "qualification_03_backup_summary",
+      "category": "Qualification",
+      "patterns": ["backup sites summary", "how many backup sites", "backup status summary"],
+      "handler": "handle_backup_sites_summary"
+    },
+    {
+      "intent_id": "qualification_04_rejected_summary",
+      "category": "Qualification",
+      "patterns": ["rejected sites summary", "how many rejected sites", "rejected status summary"],
+      "handler": "handle_rejected_sites_summary"
+    },
+    {
+      "intent_id": "qualification_05_cda_status",
+      "category": "Qualification",
+      "patterns": ["cda status meaning", "what is cda status", "explain cda states", "what does cda mean"],
+      "response": "CDA status tracks agreement readiness and may appear as pending, in review, or executed based on current data and overrides."
+    },
+    {
+      "intent_id": "qualification_06_cra_flags",
+      "category": "Qualification",
+      "patterns": ["cra flag meaning", "explain cra flag", "what does cra flag indicate", "what is cra flag", "what does cra flag mean"],
+      "response": "CRA flags highlight operational concerns such as risk, feasibility delay, or IRB review requirements."
+    },
+    {
+      "intent_id": "qualification_07_preferred_flag",
+      "category": "Qualification",
+      "patterns": ["preferred flag effect", "what does preferred do", "preferred site behavior"],
+      "response": "Preferred marks influence downstream status and can move sites toward selected outcomes before final override decisions."
+    },
+    {
+      "intent_id": "qualification_08_next_steps",
+      "category": "Qualification",
+      "patterns": ["qualification next steps", "what after qualification", "qualification to final selection"],
+      "response": "After qualification review, finalize justifications and status overrides in Final Selection before export and audit handoff.",
+      "actions": [{"label": "Open Final Selection", "type": "navigate", "target": "Final Selection"}]
+    },
+
+    {
+      "intent_id": "final_01_summary",
+      "category": "Final selection",
+      "patterns": ["final selection summary", "roster summary", "selected backup rejected counts", "final roster counts"],
+      "aliases": ["final readout", "selection totals"],
+      "keywords": ["final", "selection", "roster", "selected", "backup", "rejected"],
+      "handler": "handle_final_selection_summary"
+    },
+    {
+      "intent_id": "final_02_criteria",
+      "category": "Final selection",
+      "patterns": ["final selection criteria", "how to choose final sites", "criteria for final roster"],
+      "response": "Final selection should balance qualification score, feasibility confidence, risk profile, and documented justification for auditability."
+    },
+    {
+      "intent_id": "final_03_export_guidance",
+      "category": "Final selection",
+      "patterns": ["export final roster", "how to export matrix", "download final selection"],
+      "response": "Use Final Selection export buttons to download the roster matrix and audit log snapshots as CSV outputs."
+    },
+    {
+      "intent_id": "final_04_selected_vs_backup",
+      "category": "Final selection",
+      "patterns": ["difference between selected and backup", "selected vs backup", "backup role in final roster"],
+      "response": "Selected sites form the primary activation set. Backup sites remain contingency options for risk or timeline changes."
+    },
+    {
+      "intent_id": "final_05_rejection_reasoning",
+      "category": "Final selection",
+      "patterns": ["why reject a site", "rejection rationale", "rejected status guidance"],
+      "response": "Rejected status is typically applied to high risk or low fit sites. Capture concise justification for consistency and audit traceability."
+    },
+    {
+      "intent_id": "final_06_justification_tip",
+      "category": "Final selection",
+      "patterns": ["selection justification tips", "how to write site justification", "justification best practice"],
+      "response": "Use short evidence based reasoning referencing protocol fit, feasibility confidence, and operational readiness signals."
+    },
+    {
+      "intent_id": "final_07_override_help",
+      "category": "Final selection",
+      "patterns": ["final decision override help", "how to override final status", "save final status override"],
+      "response": "Apply status override in Final Selection and save to persist the decision in sidecar data for the next render cycle."
+    },
+
+    {
+      "intent_id": "notifications_01_summary",
+      "category": "Notifications",
+      "patterns": ["notification summary", "summarize notifications", "pending notifications", "alerts summary"],
+      "aliases": ["notification totals", "open alerts"],
+      "keywords": ["notification", "alerts", "pending", "summary"],
+      "handler": "handle_notification_summary",
+      "actions": [{"label": "Open Notification Center", "type": "navigate", "target": "CRA Notifications"}],
+      "follow_up_prompts": ["focus on pending notifications", "go to notifications"]
+    },
+    {
+      "intent_id": "notifications_02_ack_help",
+      "category": "Notifications",
+      "patterns": ["how to acknowledge notification", "acknowledge alert", "mark notification as acknowledged"],
+      "response": "In CRA Notifications, click Acknowledge on an open item to update status and persist the change."
+    },
+    {
+      "intent_id": "notifications_03_priority_meaning",
+      "category": "Notifications",
+      "patterns": ["notification priorities", "high medium low notifications", "priority meaning"],
+      "response": "Priority indicates urgency. High should be reviewed first, then medium, then low for routine follow up."
+    },
+    {
+      "intent_id": "notifications_04_sources",
+      "category": "Notifications",
+      "patterns": ["where notifications come from", "notification sources", "what triggers alerts"],
+      "response": "Notifications are generated by key workflow updates such as survey actions, qualification comments, and risk related events."
+    },
+    {
+      "intent_id": "notifications_05_focus_pending",
+      "category": "Notifications",
+      "patterns": ["focus on pending notifications", "show pending alerts first", "pending action notifications"],
+      "response": "Use the CRA Notifications page view filter to focus on pending items and clear high urgency backlog first.",
+      "actions": [{"label": "Open CRA Notifications", "type": "navigate", "target": "CRA Notifications"}]
+    },
+
+    {
+      "intent_id": "glossary_01_ai_match",
+      "category": "Glossary/definitions",
+      "patterns": ["define ai match", "what is ai match score", "ai match definition"],
+      "response": "AI match score is the normalized ranking signal used to compare candidate site fit for the active trial context."
+    },
+    {
+      "intent_id": "glossary_02_feasibility",
+      "category": "Glossary/definitions",
+      "patterns": ["define feasibility score", "what is feasibility score", "feasibility definition"],
+      "response": "Feasibility score represents operational practicality based on interest, enrollment speed, startup readiness, retention, and IRB factors."
+    },
+    {
+      "intent_id": "glossary_03_cda",
+      "category": "Glossary/definitions",
+      "patterns": ["define cda", "what is cda", "cda definition", "what does cda mean"],
+      "response": "CDA stands for confidentiality disclosure agreement and indicates legal readiness for deeper study engagement."
+    },
+    {
+      "intent_id": "glossary_04_irb",
+      "category": "Glossary/definitions",
+      "patterns": ["define irb", "what is irb", "irb definition"],
+      "response": "IRB is the institutional review board process that governs ethics oversight and startup readiness for trial participation."
+    },
+    {
+      "intent_id": "glossary_05_sla",
+      "category": "Glossary/definitions",
+      "patterns": ["define sla", "what is sla breach", "sla definition"],
+      "response": "SLA is the expected service response window. In this workflow, feasibility delay beyond threshold is tracked as an SLA breach."
+    }
+  ]
+}

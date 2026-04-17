@@ -25,3 +25,13 @@ timestamp,action,entity_type,entity_id,details
 2026-04-15 22:32:12,login,user,admin,role=Admin; full_name=Alex Morgan
 2026-04-15 23:09:28,login,user,admin,role=Admin; full_name=Alex Morgan
 2026-04-15 23:17:59,login,user,admin,role=Admin; full_name=Alex Morgan
+2026-04-17 16:08:17,login,user,admin,role=Admin; full_name=Alex Morgan
+2026-04-17 16:14:15,login,user,cra_user,role=CRA; full_name=Jordan Lee
+2026-04-17 16:14:32,login,user,admin,role=Admin; full_name=Alex Morgan
+2026-04-17 16:18:19,login,user,admin,role=Admin; full_name=Alex Morgan
+2026-04-17 16:49:19,login,user,admin,role=Admin; full_name=Alex Morgan
+2026-04-17 17:51:28,login,user,admin,role=Admin; full_name=Alex Morgan
+2026-04-17 18:21:49,login,user,admin,role=Admin; full_name=Alex Morgan
+2026-04-17 18:21:56,study_setup_generate,protocol,,"TA=Cardiology; indication=NSCLC; phase=I; enrollment=1; age=18-85; gender=All; geographies=Asia-Pacific,Europe,Latin America; biomarker=False; rare_protocol=False; density_tolerance=Low; irb_pref=Either"
+2026-04-17 20:16:28,login,user,admin,role=Admin; full_name=Alex Morgan
+2026-04-17 20:17:48,study_setup_generate,protocol,,"TA=Cardiology; indication=NSCLC; phase=I; enrollment=1; age=18-85; gender=All; geographies=Asia-Pacific,Europe,Latin America; biomarker=False; rare_protocol=False; density_tolerance=Low; irb_pref=Either"

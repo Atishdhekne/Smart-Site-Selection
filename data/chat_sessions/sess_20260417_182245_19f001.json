@@ -1,0 +1,66 @@
+{
+  "session_id": "sess_20260417_182245_19f001",
+  "title": "show top ranked sites",
+  "username": "admin",
+  "created_at": "2026-04-17 18:22:45",
+  "updated_at": "2026-04-17 20:16:57",
+  "context_scope": "Site Filtering",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Hi, I am your deterministic SmartSite assistant. I can summarize ranking, feasibility, qualification, final selection, and notifications. Current context scope: Site Filtering.",
+      "timestamp": "2026-04-17 18:22:45",
+      "actions": [
+        {
+          "label": "Show Top Ranked Sites",
+          "type": "prompt",
+          "target": "show top ranked sites"
+        },
+        {
+          "label": "Navigate to Site Filtering",
+          "type": "navigate",
+          "target": "Site Filtering",
+          "target_page": "Site Filtering"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "show top ranked sites",
+      "timestamp": "2026-04-17 18:22:54"
+    },
+    {
+      "role": "assistant",
+      "content": "Top ranked sites in Site Filtering (156 rows):\n1. Hospital 135 (United States) - AI 98, Feasibility 100, PI Dr. Ling Brown\n2. Hospital 78 (China) - AI 93, Feasibility 94, PI Dr. Priya Kim\n3. Hospital 83 (China) - AI 74, Feasibility 66, PI Dr. John Silva\n4. Hospital 1 (India) - AI 71, Feasibility 61, PI Dr. Sanjay Brown\n5. Hospital 32 (KR) - AI 70, Feasibility 80, PI Dr. Sanjay Li",
+      "timestamp": "2026-04-17 18:22:54",
+      "actions": [
+        {
+          "label": "View Qualification Details",
+          "type": "navigate",
+          "target": "Qualification",
+          "target_page": "Qualification"
+        },
+        {
+          "label": "Ask: Top Sites In Europe",
+          "type": "prompt",
+          "target": "top sites in europe"
+        },
+        {
+          "label": "Ask: High Risk Sites",
+          "type": "prompt",
+          "target": "high risk sites"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "high risk sites",
+      "timestamp": "2026-04-17 20:16:57"
+    },
+    {
+      "role": "assistant",
+      "content": "High-risk site summary for Site Filtering (4 site(s)):\n1. Hospital 140 (GB) - CRA flag: Risk\n2. Hospital 186 (United States) - CRA flag: Risk\n3. Hospital 94 (KR) - CRA flag: Risk\n4. Hospital 109 (Germany) - CRA flag: Risk",
+      "timestamp": "2026-04-17 20:16:57"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "session_id": "sess_20260417_182302_df0b0d",
+  "title": "show top sites in europe",
+  "username": "admin",
+  "created_at": "2026-04-17 18:23:02",
+  "updated_at": "2026-04-17 18:23:11",
+  "context_scope": "Site Filtering",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Hi, I am your deterministic SmartSite assistant. I can summarize ranking, feasibility, qualification, final selection, and notifications. Current context scope: Site Filtering.",
+      "timestamp": "2026-04-17 18:23:02",
+      "actions": [
+        {
+          "label": "Show Top Ranked Sites",
+          "type": "prompt",
+          "target": "show top ranked sites"
+        },
+        {
+          "label": "Navigate to Site Filtering",
+          "type": "navigate",
+          "target": "Site Filtering",
+          "target_page": "Site Filtering"
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "show top sites in europe",
+      "timestamp": "2026-04-17 18:23:11"
+    },
+    {
+      "role": "assistant",
+      "content": "Top European candidates in Site Filtering (35 rows):\n1. Hospital 8 (IT) - AI 48, Feasibility 64, PI Dr. John Rossi\n2. Hospital 2 (Spain) - AI 46, Feasibility 94, PI Dr. Priya Suzuki\n3. Hospital 214 (France) - AI 39, Feasibility 82, PI Dr. Marco Brown\n4. Hospital 140 (GB) - AI 38, Feasibility 71, PI Dr. Priya Zhang\n5. Hospital 201 (France) - AI 36, Feasibility 66, PI Dr. Julia Kim",
+      "timestamp": "2026-04-17 18:23:11",
+      "actions": [
+        {
+          "label": "Open Site Filtering",
+          "type": "navigate",
+          "target": "Site Filtering",
+          "target_page": "Site Filtering"
+        }
+      ]
+    }
+  ]
+}

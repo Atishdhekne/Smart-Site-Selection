@@ -10,6 +10,8 @@ import plotly.graph_objects as go
 import requests
 import streamlit as st
 
+from ui.chatbot_assistance import render_chatbot_assistance_page
+
 st.set_page_config(page_title="SmartSite Select", page_icon="🧬", layout="wide", initial_sidebar_state="expanded")
 
 BASE_DIR = Path(__file__).parent
@@ -93,14 +95,32 @@ CHAT_USAGE_COLUMNS = [
     "used_local_llm",
     "success",
     "error_message",
+    "context_scope",
+    "matched_intent_id",
+    "response_mode",
+    "fallback_used",
 ]
-CHAT_USAGE_TEXT_COLUMNS = ["usage_id", "username", "full_name", "role", "timestamp", "page_name", "prompt", "response", "error_message"]
-CHAT_USAGE_BOOL_COLUMNS = ["used_local_llm", "success"]
+CHAT_USAGE_TEXT_COLUMNS = [
+    "usage_id",
+    "username",
+    "full_name",
+    "role",
+    "timestamp",
+    "page_name",
+    "prompt",
+    "response",
+    "error_message",
+    "context_scope",
+    "matched_intent_id",
+    "response_mode",
+]
+CHAT_USAGE_BOOL_COLUMNS = ["used_local_llm", "success", "fallback_used"]
 
 DEFAULT_CHAT_GREETING = (
     "Ask me about site feasibility, qualification status, top sites in a region, "
     "or how the AI score was calculated."
 )
+ENABLE_LOCAL_LLM_CHAT = False
 
 TRUE_BOOL_VALUES = {"1", "true", "t", "yes", "y"}
 FALSE_BOOL_VALUES = {"0", "false", "f", "no", "n", ""}
@@ -463,6 +483,10 @@ def append_chat_usage(
     used_local_llm: bool,
     success: bool,
     error_message: str,
+    context_scope: str = "",
+    matched_intent_id: str = "",
+    response_mode: str = "",
+    fallback_used: bool = False,
 ) -> None:
     try:
         usage = load_or_init_chat_usage()
@@ -478,6 +502,10 @@ def append_chat_usage(
             "used_local_llm": bool(used_local_llm),
             "success": bool(success),
             "error_message": truncate_for_storage(error_message, 400),
+            "context_scope": truncate_for_storage(context_scope, 120),
+            "matched_intent_id": truncate_for_storage(matched_intent_id, 120),
+            "response_mode": truncate_for_storage(response_mode, 40),
+            "fallback_used": bool(fallback_used),
         }
         save_csv(usage[CHAT_USAGE_COLUMNS], "chat_usage.csv")
     except Exception:
@@ -486,7 +514,14 @@ def append_chat_usage(
 
 
 def reset_chat_history() -> None:
-    st.session_state["chat_history"] = [{"role": "assistant", "content": DEFAULT_CHAT_GREETING}]
+    for key in [
+        "chat_history",
+        "chatbot_messages",
+        "chatbot_active_session",
+        "chat_input_text",
+        "chat_context_scope",
+    ]:
+        st.session_state.pop(key, None)
 
 
 # Raw source inputs loaded from packaged CSV/JSON files.
@@ -586,8 +621,8 @@ def _build_default_trial_context(trial_seed: dict) -> dict:
     default_geos = geo_options[:3] if geo_options else []
 
     return {
-        "study_title": f"Phase {trial_phase} Evaluation of {trial_ind} in {trial_ta}",
-        "protocol_id": f"ST-{trial_phase}-{trial_ta[:3].upper()}-03",
+        "study_title": "",
+        "protocol_id": "",
         "therapeutic_area": trial_ta,
         "indication": trial_ind,
         "phase": trial_phase,
@@ -646,8 +681,8 @@ def normalize_trial_context(raw_context: dict | None) -> dict:
     total_target_enrollment = int(enrollment_raw) if not _is_missing(enrollment_raw) else int(DEFAULT_TRIAL_CONTEXT["total_target_enrollment"])
     min_age = int(min_age_raw) if not _is_missing(min_age_raw) else int(DEFAULT_TRIAL_CONTEXT["min_age"])
     max_age = int(max_age_raw) if not _is_missing(max_age_raw) else int(DEFAULT_TRIAL_CONTEXT["max_age"])
-    min_age = max(0, min_age)
-    max_age = max(min_age, max_age)
+    min_age = max(18, min_age)
+    max_age = max(18, min_age, max_age)
 
     gender = normalize_text_value(merged.get("gender", DEFAULT_TRIAL_CONTEXT["gender"])).strip() or DEFAULT_TRIAL_CONTEXT["gender"]
     if gender not in {"All", "Male", "Female"}:
@@ -664,10 +699,8 @@ def normalize_trial_context(raw_context: dict | None) -> dict:
         irb_preference = DEFAULT_TRIAL_CONTEXT["irb_preference"]
 
     context = {
-        "study_title": normalize_text_value(merged.get("study_title", DEFAULT_TRIAL_CONTEXT["study_title"])).strip()
-        or f"Phase {phase} Evaluation of {indication} in {therapeutic_area}",
-        "protocol_id": normalize_text_value(merged.get("protocol_id", DEFAULT_TRIAL_CONTEXT["protocol_id"])).strip()
-        or f"ST-{phase}-{therapeutic_area[:3].upper()}-03",
+        "study_title": normalize_text_value(merged.get("study_title", DEFAULT_TRIAL_CONTEXT["study_title"])).strip(),
+        "protocol_id": normalize_text_value(merged.get("protocol_id", DEFAULT_TRIAL_CONTEXT["protocol_id"])).strip(),
         "therapeutic_area": therapeutic_area,
         "indication": indication,
         "phase": phase,
@@ -691,6 +724,21 @@ def initialize_trial_context_state() -> None:
     for field, widget_key in TRIAL_CONTEXT_WIDGET_KEYS.items():
         if widget_key not in st.session_state:
             st.session_state[widget_key] = active.get(field)
+        elif field in {"min_age", "max_age"}:
+            age_raw = pd.to_numeric(st.session_state.get(widget_key), errors="coerce")
+            if _is_missing(age_raw):
+                st.session_state[widget_key] = int(active.get(field, 18))
+            else:
+                st.session_state[widget_key] = max(18, int(age_raw))
+
+    min_key = TRIAL_CONTEXT_WIDGET_KEYS["min_age"]
+    max_key = TRIAL_CONTEXT_WIDGET_KEYS["max_age"]
+    min_age_state_raw = pd.to_numeric(st.session_state.get(min_key), errors="coerce")
+    max_age_state_raw = pd.to_numeric(st.session_state.get(max_key), errors="coerce")
+    min_age_state = int(min_age_state_raw) if not _is_missing(min_age_state_raw) else 18
+    max_age_state = int(max_age_state_raw) if not _is_missing(max_age_state_raw) else min_age_state
+    st.session_state[min_key] = max(18, min_age_state)
+    st.session_state[max_key] = max(18, st.session_state[min_key], max_age_state)
     history = st.session_state.get("trial_context_history")
     if not isinstance(history, list):
         st.session_state["trial_context_history"] = []
@@ -1147,6 +1195,33 @@ def style_app():
       color: var(--text-dark) !important;
       border: 1px solid var(--border) !important;
     }
+    div[data-testid="stTextInput"] input {
+      color: #1F2937 !important;
+      -webkit-text-fill-color: #1F2937 !important;
+      caret-color: #1F2937 !important;
+      background: #FFFFFF !important;
+      opacity: 1 !important;
+    }
+    div[data-testid="stTextInput"] input::placeholder {
+      color: #94A3B8 !important;
+      opacity: 1 !important;
+    }
+    div[data-testid="stTextInput"] input::-webkit-input-placeholder {
+      color: #94A3B8 !important;
+      opacity: 1 !important;
+    }
+    div[data-testid="stTextInput"] input::-moz-placeholder {
+      color: #94A3B8 !important;
+      opacity: 1 !important;
+    }
+    div[data-testid="stTextInput"] input:-ms-input-placeholder {
+      color: #94A3B8 !important;
+      opacity: 1 !important;
+    }
+    div[data-testid="stTextInput"] input::-ms-input-placeholder {
+      color: #94A3B8 !important;
+      opacity: 1 !important;
+    }
     .stRadio [role="radiogroup"] label, .stRadio [role="radiogroup"] p { color: var(--text-dark) !important; }
     .stButton > button, .stDownloadButton > button {
       background: #EDF3FB;
@@ -1593,6 +1668,14 @@ def chatbot_answer_fallback(query: str, context_df: pd.DataFrame) -> str:
 
 def chatbot_answer(query: str, page_name: str, context_df: pd.DataFrame) -> dict:
     context = build_chat_context(page_name, context_df)
+    if not ENABLE_LOCAL_LLM_CHAT:
+        return {
+            "response": chatbot_answer_fallback(query, context_df),
+            "used_local_llm": False,
+            "fallback_used": True,
+            "success": True,
+            "error_message": "",
+        }
     try:
         answer = query_local_llm(query, context)
         return {
@@ -1720,8 +1803,16 @@ if page == "Study Setup":
         with st.container(border=True):
             st.markdown("<div class='section-head'>General Information</div>", unsafe_allow_html=True)
             c1, c2 = st.columns(2)
-            study_title = c1.text_input("Study Title", key=TRIAL_CONTEXT_WIDGET_KEYS["study_title"])
-            protocol_id = c2.text_input("Protocol ID", key=TRIAL_CONTEXT_WIDGET_KEYS["protocol_id"])
+            study_title = c1.text_input(
+                "Study Title",
+                key=TRIAL_CONTEXT_WIDGET_KEYS["study_title"],
+                placeholder="e.g. Phase III Evaluation of NSCLC in Oncology",
+            )
+            protocol_id = c2.text_input(
+                "Protocol ID",
+                key=TRIAL_CONTEXT_WIDGET_KEYS["protocol_id"],
+                placeholder="e.g. ST-III-ONC-03",
+            )
             st.divider()
             st.markdown("<div class='section-head'>Clinical Parameters</div>", unsafe_allow_html=True)
             c3, c4 = st.columns(2)
@@ -1740,8 +1831,8 @@ if page == "Study Setup":
             st.markdown("<div class='section-head'>Population & Geography</div>", unsafe_allow_html=True)
             c5, c6, c7, c8 = st.columns([1.25, 1.0, 1.0, 0.95])
             c5.number_input("Total Target Enrollment", min_value=1, step=10, key=TRIAL_CONTEXT_WIDGET_KEYS["total_target_enrollment"])
-            c6.number_input("Min Age (in years)", min_value=0, step=1, key=TRIAL_CONTEXT_WIDGET_KEYS["min_age"])
-            c7.number_input("Max Age (in years)", min_value=0, step=1, key=TRIAL_CONTEXT_WIDGET_KEYS["max_age"])
+            c6.number_input("Min Age (in years)", min_value=18, step=1, key=TRIAL_CONTEXT_WIDGET_KEYS["min_age"])
+            c7.number_input("Max Age (in years)", min_value=18, step=1, key=TRIAL_CONTEXT_WIDGET_KEYS["max_age"])
             c8.selectbox("Gender", ["All", "Male", "Female"], key=TRIAL_CONTEXT_WIDGET_KEYS["gender"])
             geos = st.multiselect(
                 "Target Geographies",
@@ -1751,9 +1842,7 @@ if page == "Study Setup":
             with st.expander("Advanced Feasibility Parameters", expanded=True):
                 a1, a2 = st.columns(2)
                 biomarker_required = a1.checkbox("Require Biomarker Testing", key=TRIAL_CONTEXT_WIDGET_KEYS["require_biomarker_testing"])
-                a1.caption("Prioritize sites with in-house genomic sequencing capabilities.")
                 rare_disease_protocol = a1.checkbox("Rare Disease Protocol", key=TRIAL_CONTEXT_WIDGET_KEYS["rare_disease_protocol"])
-                a1.caption("Adjusts AI modeling for hyper-specific patient populations.")
                 a2.selectbox(
                     "Competitive Trial Density Tolerance",
                     ["Low", "Medium (Standard)", "High"],
@@ -2147,64 +2236,17 @@ elif page == "Final Selection":
         st.download_button("Export Audit Log", load_or_init("audit_log.csv", ["timestamp", "action", "entity_type", "entity_id", "details"]).to_csv(index=False).encode("utf-8"), file_name="audit_log.csv", mime="text/csv", use_container_width=True)
 
 elif page == "Chatbot Assistance":
-    st.markdown("<div class='page-title'>Chatbot Assistance</div><div class='page-sub'>Use the assistant for navigation guidance, site queries, and score explanations based on the current dashboard state.</div>", unsafe_allow_html=True)
-    chat_scope_options = [
-        "Site Filtering",
-        "Feasibility Distribution",
-        "Feasibility Responses",
-        "Feasibility Analysis",
-        "Qualification",
-        "Final Selection",
-        "All Sites (Unfiltered)",
-    ]
-    last_context_page = normalize_text_value(st.session_state.get("last_context_page", "Site Filtering"))
-    default_scope = last_context_page if last_context_page in chat_scope_options else "Site Filtering"
-    c1, c2 = st.columns([0.65, 1.75])
-    with c1:
-        st.markdown("<div class='surface'><div class='section-head'>Recent Sessions</div>", unsafe_allow_html=True)
-        selected_context_scope = st.selectbox(
-            "Context Scope",
-            options=chat_scope_options,
-            index=chat_scope_options.index(default_scope),
-            key="chat_context_scope",
-        )
-        chat_context_df = resolve_chatbot_context_df(selected_context_scope, MASTER)
-        st.caption(f"Using context from {selected_context_scope} ({len(chat_context_df)} rows).")
-        for item in ["Mass General Feasibility", "European Oncology Sites", "SLA Breach Analysis", "Protocol ST-492 Setup"]:
-            st.markdown(f"- {item}")
-        if st.button("New Chat Session", use_container_width=True):
-            reset_chat_history()
-            st.success("New Chat Session started. Chat history has been reset.")
-        st.markdown("</div>", unsafe_allow_html=True)
-    with c2:
-        if "chat_history" not in st.session_state:
-            reset_chat_history()
-        st.markdown("<div class='surface-dark' style='min-height:520px'>", unsafe_allow_html=True)
-        for msg in st.session_state.chat_history:
-            with st.chat_message(msg["role"]):
-                st.write(msg["content"])
-        prompt = st.chat_input("Ask about site feasibility, qualification status, or navigate the app...")
-        if prompt:
-            st.session_state.chat_history.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.write(prompt)
-            answer_payload = chatbot_answer(prompt, selected_context_scope, chat_context_df)
-            answer_text = normalize_text_value(answer_payload.get("response", "")).strip() or chatbot_answer_fallback(prompt, chat_context_df)
-            st.session_state.chat_history.append({"role": "assistant", "content": answer_text})
-            with st.chat_message("assistant"):
-                st.write(answer_text)
-            append_chat_usage(
-                username=normalize_text_value(st.session_state.get("current_user", "")),
-                full_name=normalize_text_value(st.session_state.get("current_full_name", "")),
-                role=normalize_text_value(st.session_state.get("current_role", "")),
-                page_name=f"{page} [{selected_context_scope}]",
-                prompt=prompt,
-                response=answer_text,
-                used_local_llm=bool(answer_payload.get("used_local_llm", False)),
-                success=bool(answer_payload.get("success", False)),
-                error_message=normalize_text_value(answer_payload.get("error_message", "")),
-            )
-        st.markdown("</div>", unsafe_allow_html=True)
+    render_chatbot_assistance_page(
+        master_df=MASTER,
+        page_name=page,
+        resolve_chatbot_context_df_callback=resolve_chatbot_context_df,
+        load_notifications_callback=load_or_init_notifications,
+        get_trial_context_callback=get_active_trial_context,
+        log_chat_usage_callback=append_chat_usage,
+        set_flash_message_callback=set_flash_message,
+        session_state=st.session_state,
+        normalize_text_value_callback=normalize_text_value,
+    )
 
 elif page == "CRA Notifications":
     st.markdown("<div class='page-title'>Notification Center</div><div class='page-sub'>Manage feasibility submissions, pending actions, and acknowledgement status from the persisted notifications dataset.</div>", unsafe_allow_html=True)
@@ -2227,10 +2269,9 @@ elif page == "CRA Notifications":
             show = show[show["acknowledged"].fillna(False)]
         for _, note in show.sort_values("created_at", ascending=False).iterrows():
             with st.container(border=True):
-                a, b, c = st.columns([2.3, 0.8, 0.9])
+                a, c = st.columns([2.8, 1.0])
                 a.markdown(f"**{note['type']}**")
                 a.caption(f"{note.get('site_name', note['site_id'])} has an update. {note['message']}")
-                b.markdown(f"<span class='site-chip {'chip-danger' if note['priority']=='High' else 'chip-warning' if note['priority']=='Medium' else 'chip-info'}'>{note['priority'].upper()}</span>", unsafe_allow_html=True)
                 if bool(note.get("acknowledged", False)):
                     c.caption("Acknowledged")
                 else:
@@ -2239,6 +2280,6 @@ elif page == "CRA Notifications":
                         append_audit("notification_ack", "notification", note["notification_id"], note["type"])
                         set_flash_message("Acknowledge completed. Notification marked as acknowledged.")
                         clear_and_rerun()
-                st.caption(str(note["created_at"]))
+                a.caption(str(note["created_at"]))
 
 st.caption(f"Using local data folder: {DATA_DIR}")

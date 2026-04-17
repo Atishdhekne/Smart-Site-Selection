@@ -1,1 +1,19 @@
-usage_id,username,full_name,role,timestamp,page_name,prompt,response,used_local_llm,success,error_message
+usage_id,username,full_name,role,timestamp,page_name,prompt,response,used_local_llm,success,error_message,context_scope,matched_intent_id,response_mode,fallback_used
+U20260417164950590071,admin,Alex Morgan,Admin,2026-04-17 16:49:50,Chatbot Assistance,pending feasibility responses,Pending feasibility responses: 33 site(s). SLA breaches (>7 days open): 0.,False,True,,Site Filtering,feasibility_01_pending_responses,handler,False
+U20260417182254396990,admin,Alex Morgan,Admin,2026-04-17 18:22:54,Chatbot Assistance,show top ranked sites,"Top ranked sites in Site Filtering (156 rows):
+1. Hospital 135 (United States) - AI 98, Feasibility 100, PI Dr. Ling Brown
+2. Hospital 78 (China) - AI 93, Feasibility 94, PI Dr. Priya Kim
+3. Hospital 83 (China) - AI 74, Feasibility 66, PI Dr. John Silva
+4. Hospital 1 (India) - AI 71, Feasibility 61, PI Dr. Sanjay Brown
+5. Hospital 32 (KR) - AI 70, Feasibility 80, PI Dr. Sanjay Li",False,True,,Site Filtering,ranking_01_top_sites,handler,False
+U20260417182311775425,admin,Alex Morgan,Admin,2026-04-17 18:23:11,Chatbot Assistance,show top sites in europe,"Top European candidates in Site Filtering (35 rows):
+1. Hospital 8 (IT) - AI 48, Feasibility 64, PI Dr. John Rossi
+2. Hospital 2 (Spain) - AI 46, Feasibility 94, PI Dr. Priya Suzuki
+3. Hospital 214 (France) - AI 39, Feasibility 82, PI Dr. Marco Brown
+4. Hospital 140 (GB) - AI 38, Feasibility 71, PI Dr. Priya Zhang
+5. Hospital 201 (France) - AI 36, Feasibility 66, PI Dr. Julia Kim",False,True,,Site Filtering,ranking_02_top_sites_europe,handler,False
+U20260417201657623867,admin,Alex Morgan,Admin,2026-04-17 20:16:57,Chatbot Assistance,high risk sites,"High-risk site summary for Site Filtering (4 site(s)):
+1. Hospital 140 (GB) - CRA flag: Risk
+2. Hospital 186 (United States) - CRA flag: Risk
+3. Hospital 94 (KR) - CRA flag: Risk
+4. Hospital 109 (Germany) - CRA flag: Risk",False,True,,Site Filtering,ranking_06_high_risk_sites,handler,False

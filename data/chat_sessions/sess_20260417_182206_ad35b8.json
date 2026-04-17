@@ -1,0 +1,28 @@
+{
+  "session_id": "sess_20260417_182206_ad35b8",
+  "title": "New Chat",
+  "username": "admin",
+  "created_at": "2026-04-17 18:22:06",
+  "updated_at": "2026-04-17 20:26:57",
+  "context_scope": "Final Selection",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Hi, I am your deterministic SmartSite assistant. I can summarize ranking, feasibility, qualification, final selection, and notifications. Current context scope: Site Filtering.",
+      "timestamp": "2026-04-17 18:22:06",
+      "actions": [
+        {
+          "label": "Show Top Ranked Sites",
+          "type": "prompt",
+          "target": "show top ranked sites"
+        },
+        {
+          "label": "Navigate to Site Filtering",
+          "type": "navigate",
+          "target": "Site Filtering",
+          "target_page": "Site Filtering"
+        }
+      ]
+    }
+  ]
+}
