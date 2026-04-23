@@ -1340,10 +1340,10 @@ elif page == "Feasibility Analysis and Qualification":
     else:
         st.markdown("### Site Feasibility Analysis")
         site_options = analysis_df[["site_id","site_name","country_label"]].drop_duplicates(subset=["site_id"]).copy()
-        site_labels = {r.site_id: f"{r.site_name} ({r.country_label})" for r in site_options.itertuples(index=False)}
+        site_labels = {r.site_id: f"{r.site_name} (United States)" for r in site_options.itertuples(index=False)}
         selected_site_id = st.selectbox("Choose Site for Analysis",site_options["site_id"].tolist(),format_func=lambda sid: site_labels.get(sid,sid))
         row = analysis_df[analysis_df["site_id"] == selected_site_id].iloc[0]
-        st.markdown(f"<div class='surface-dark'><div style='display:flex;justify-content:space-between;align-items:center'><div><div style='font-size:22px;font-weight:800'>{row['site_name']}</div><div>{row['city']}, {row['country_label']}  •  PI: {row['matched_pi_name']}  •  Feasibility {('Completed' if row['response_received'] else 'Pending')}</div></div><div style='font-size:46px;font-weight:800'>{int(row['ai_rank_score'])}<span style='font-size:18px'>/100</span></div></div></div>",unsafe_allow_html=True)
+        st.markdown(f"<div class='surface-dark'><div style='display:flex;justify-content:space-between;align-items:center'><div><div style='font-size:22px;font-weight:800'>{row['site_name']}</div><div>{row['city']}, United States  •  PI: {row['matched_pi_name']}  •  Feasibility Completed</div></div><div style='font-size:46px;font-weight:800'>{int(row['ai_rank_score'])}<span style='font-size:18px'>/100</span></div></div></div>",unsafe_allow_html=True)
         st.markdown("<div class='section-head' style='margin-top:12px'>Key Metrics</div>",unsafe_allow_html=True)
         m1,m2,m3,m4,m5,m6 = st.columns(6)
         m1.metric("AI Match Score",f"{int(row.get('ai_rank_score',0))}/100")
@@ -1351,7 +1351,7 @@ elif page == "Feasibility Analysis and Qualification":
         m3.metric("Qualification Score",f"{int(row.get('qualification_score',0))}/100")
         m4.metric("Risk Level",row.get("risk_level","Unknown"))
         m5.metric("PI Experience",f"{int(row.get('pi_years_experience',0) or 0)} yrs")
-        m6.metric("Enrollment Rate",f"{round(row.get('avg_enroll_rate_per_month',0) or 0,1)}/mo")
+        m6.metric("Enrollment Rate",f"{round(float(row.get('avg_enroll_rate_per_month') or 0),1)}/mo")
         st.divider()
         st.markdown("### Qualification & CDA Review")
         with st.container(border=True):
