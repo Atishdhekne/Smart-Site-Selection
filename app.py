@@ -1275,7 +1275,7 @@ elif page == "Feasibility Distribution and Responses":
         st.markdown("<div class='section-head'>Survey Distribution Controls</div>",unsafe_allow_html=True)
         c_left, c_right = st.columns([1,1])
         with c_left:
-            template = st.text_input("Survey Template",value=f"{active_trial_context['therapeutic_area']}-{active_trial_context['indication']}-feasibility")
+            template_name = st.text_input("Survey Template", "Diabetes Mellitus Feasibility")
             chosen = st.multiselect("Distribution list",options=FEASIBILITY_DIST_DATA["Site Details"].tolist(),default=FEASIBILITY_DIST_DATA["Site Details"].tolist())
         with c_right:
             st.markdown("<br>",unsafe_allow_html=True)
