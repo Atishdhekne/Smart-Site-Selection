@@ -393,7 +393,7 @@ def get_trial_ta_options() -> list[str]:
         values.update(PERF["therapeutic_area"].dropna().astype(str).str.strip().tolist())
     if "new_trial_ta" in FEAS.columns:
         values.update(FEAS["new_trial_ta"].dropna().astype(str).str.strip().tolist())
-    trial_ta = normalize_text_value(TRIAL.get("therapeutic_area","Oncology")).strip()
+    trial_ta = normalize_text_value(TRIAL.get("therapeutic_area","")).strip()
     if trial_ta:
         values.add(trial_ta)
     return sorted(v for v in values if v)
@@ -416,7 +416,7 @@ def get_trial_indication_options(therapeutic_area: str | None = None) -> list[st
             values.update(PERF["indication"].dropna().astype(str).str.strip().tolist())
         if "new_trial_indication" in FEAS.columns:
             values.update(FEAS["new_trial_indication"].dropna().astype(str).str.strip().tolist())
-    trial_ind = normalize_text_value(TRIAL.get("indication","NSCLC")).strip()
+    trial_ind = normalize_text_value(TRIAL.get("indication","")).strip()
     if trial_ind:
         values.add(trial_ind)
     values.add("Diabetes")
@@ -427,13 +427,13 @@ def _build_default_trial_context(trial_seed: dict) -> dict:
     ta_options = get_trial_ta_options()
     if trial_ta not in ta_options:
         ta_options = sorted(set(ta_options + [trial_ta]))
-    if ta_options and trial_ta not in ta_options:
+    if ta_options and trial_ta and trial_ta not in ta_options:
         trial_ta = ta_options[0]
-    trial_ind = normalize_text_value(trial_seed.get("indication","NSCLC")).strip() or "NSCLC"
+    trial_ind = normalize_text_value(trial_seed.get("indication","")).strip()
     indication_options = get_trial_indication_options(trial_ta)
     if trial_ind not in indication_options:
         indication_options = sorted(set(indication_options + [trial_ind]))
-    if indication_options and trial_ind not in indication_options:
+    if indication_options and trial_ind and trial_ind not in indication_options:
         trial_ind = indication_options[0]
     trial_phase = normalize_text_value(trial_seed.get("phase","III")).strip() or "III"
     if trial_phase not in TRIAL_PHASE_OPTIONS:
@@ -449,16 +449,12 @@ def normalize_trial_context(raw_context: dict | None) -> dict:
     if isinstance(raw_context, dict):
         merged.update(raw_context)
     ta_options = get_trial_ta_options()
-    therapeutic_area = normalize_text_value(merged.get("therapeutic_area",DEFAULT_TRIAL_CONTEXT["therapeutic_area"])).strip()
-    if not therapeutic_area:
-        therapeutic_area = DEFAULT_TRIAL_CONTEXT["therapeutic_area"]
-    if ta_options and therapeutic_area not in ta_options:
+    therapeutic_area = normalize_text_value(merged.get("therapeutic_area","")).strip()
+    if ta_options and therapeutic_area and therapeutic_area not in ta_options:
         therapeutic_area = ta_options[0]
     indication_options = get_trial_indication_options(therapeutic_area)
-    indication = normalize_text_value(merged.get("indication",DEFAULT_TRIAL_CONTEXT["indication"])).strip()
-    if not indication:
-        indication = DEFAULT_TRIAL_CONTEXT["indication"]
-    if indication_options and indication not in indication_options:
+    indication = normalize_text_value(merged.get("indication","")).strip()
+    if indication_options and indication and indication not in indication_options:
         indication = indication_options[0]
     phase = normalize_text_value(merged.get("phase",DEFAULT_TRIAL_CONTEXT["phase"])).strip()
     if phase not in TRIAL_PHASE_OPTIONS:
@@ -502,7 +498,10 @@ def initialize_trial_context_state() -> None:
     active = st.session_state["trial_context"]
     for field, widget_key in TRIAL_CONTEXT_WIDGET_KEYS.items():
         if widget_key not in st.session_state:
-            st.session_state[widget_key] = active.get(field)
+            if field in ("therapeutic_area", "indication"):
+                st.session_state[widget_key] = "-- None --"
+            else:
+                st.session_state[widget_key] = active.get(field)
     history = st.session_state.get("trial_context_history")
     if not isinstance(history, list):
         st.session_state["trial_context_history"] = []
@@ -772,7 +771,10 @@ def style_app():
     [data-testid="stSidebar"] .stRadio div[data-testid="stMarkdownContainer"] p {
       color: #FFFFFF !important;
     }
-    .block-container { padding-top: 1rem; padding-bottom: 2rem; max-width: 1280px; }
+    .block-container { padding-top: 0rem; padding-bottom: 2rem; max-width: 1280px; }
+    header[data-testid="stHeader"] { display: none !important; }
+    #MainMenu { display: none !important; }
+    .stAppDeployButton { display: none !important; }
     .topbar { background: var(--sidebar-blue); border-radius: 16px; padding: 14px 18px; color: #FFFFFF; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
     .crumb { font-size: 14px; opacity:.95; }
     .search-pill { background: rgba(255,255,255,.94); color: var(--text-muted); border-radius:12px; padding:10px 16px; min-width:260px; text-align:left; }
@@ -1087,17 +1089,17 @@ if page == "Study Setup and Site Filtering":
 
     ta_options = get_trial_ta_options()
     if not ta_options:
-        ta_options = [active_trial_context["therapeutic_area"]]
+        ta_options = []
     ta_key = TRIAL_CONTEXT_WIDGET_KEYS["therapeutic_area"]
-    if normalize_text_value(st.session_state.get(ta_key,"")) not in ta_options:
-        st.session_state[ta_key] = active_trial_context["therapeutic_area"] if active_trial_context["therapeutic_area"] in ta_options else ta_options[0]
+    if st.session_state.get(ta_key) not in (["-- None --"] + ta_options):
+        st.session_state[ta_key] = "-- None --"
 
-    indication_options = get_trial_indication_options(st.session_state[ta_key])
+    indication_options = get_trial_indication_options(st.session_state.get(ta_key,""))
     if not indication_options:
-        indication_options = [active_trial_context["indication"]]
+        indication_options = []
     indication_key = TRIAL_CONTEXT_WIDGET_KEYS["indication"]
-    if normalize_text_value(st.session_state.get(indication_key,"")) not in indication_options:
-        st.session_state[indication_key] = active_trial_context["indication"] if active_trial_context["indication"] in indication_options else indication_options[0]
+    if st.session_state.get(indication_key) not in (["-- None --"] + indication_options):
+        st.session_state[indication_key] = "-- None --"
 
     geo_options = sorted(SITES["region"].dropna().astype(str).str.strip().unique().tolist())
     geos_key = TRIAL_CONTEXT_WIDGET_KEYS["target_geographies"]
@@ -1109,44 +1111,25 @@ if page == "Study Setup and Site Filtering":
 
     with st.container(border=True):
         st.markdown("<div class='section-head'>Protocol Definition</div>",unsafe_allow_html=True)
-        word_col, pdf_col = st.columns(2)
-        with word_col:
-            st.markdown("""<style>div[data-testid="stFileUploader"]:has(input[accept*=".xlsx"]) { border:2px solid #16A34A !important; border-radius:8px !important; background:#F0FDF4 !important; padding:4px 8px !important; } div[data-testid="stFileUploader"]:has(input[accept*=".xlsx"]) button { background:#16A34A !important; color:#fff !important; border-radius:6px !important; font-size:11px !important; padding:2px 10px !important; } div[data-testid="stFileUploader"]:has(input[accept*=".xlsx"]) label, div[data-testid="stFileUploader"]:has(input[accept*=".xlsx"]) span, div[data-testid="stFileUploader"]:has(input[accept*=".xlsx"]) p { font-size:11px !important; color:#16A34A !important; }</style>""",unsafe_allow_html=True)
-            word_file = st.file_uploader("Upload Feasibility",type=["docx","doc","xlsx","xls"],key="word_xlsx_uploader")
-            if word_file is not None:
-                prev_word_key = st.session_state.get("_last_word_file_name","")
-                if prev_word_key != word_file.name:
-                    st.session_state["_last_word_file_name"] = word_file.name
-                    st.session_state["_word_upload_toast"] = word_file.name
-            if st.session_state.get("_word_upload_toast"):
-                fname = st.session_state["_word_upload_toast"]
-                st.success(f"✅ File uploaded successfully: **{fname}**")
-                if "_word_toast_shown" not in st.session_state:
-                    st.session_state["_word_toast_shown"] = 0
-                st.session_state["_word_toast_shown"] += 1
-                if st.session_state["_word_toast_shown"] >= 2:
-                    st.session_state.pop("_word_upload_toast",None)
-                    st.session_state.pop("_word_toast_shown",None)
-        with pdf_col:
-            st.markdown("""<style>div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) { border:2px solid #2563EB !important; border-radius:8px !important; background:#EFF6FF !important; padding:4px 8px !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) button { background:#2563EB !important; color:#fff !important; border-radius:6px !important; font-size:11px !important; padding:2px 10px !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) label, div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) span, div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) p { font-size:11px !important; color:#2563EB !important; }</style>""",unsafe_allow_html=True)
-            pdf_file = st.file_uploader("Upload Protocol (PDF)",type=["pdf"],key="pdf_uploader")
-            if pdf_file is not None:
-                pdf_file.seek(0)
-                data = extract_protocol_data(pdf_file)
-                if data:
-                    st.success("Protocol auto-filled from PDF")
-                    if data.get("study_title"):
-                        st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["study_title"]] = data["study_title"]
-                    if data.get("protocol_id"):
-                        st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["protocol_id"]] = data["protocol_id"]
-                    if data.get("therapeutic_area"):
-                        st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["therapeutic_area"]] = data["therapeutic_area"]
-                    if data.get("indication"):
-                        ind_val = data["indication"]
-                        ind_opts = get_trial_indication_options(data.get("therapeutic_area",""))
-                        if ind_val not in ind_opts:
-                            ind_opts = sorted(set(ind_opts + [ind_val]))
-                        st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["indication"]] = ind_val
+        st.markdown("""<style>div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) { border:1.5px dashed #2F6DB5 !important; border-radius:10px !important; background:#F8FAFD !important; padding:10px 12px !important; max-width:360px !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) section { border:none !important; background:transparent !important; padding:0 !important; display:flex !important; flex-direction:column !important; align-items:center !important; min-height:unset !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) button { background:#1F4E8C !important; color:#ffffff !important; border:none !important; border-radius:7px !important; font-size:11px !important; font-weight:700 !important; padding:5px 18px !important; margin:4px auto 0 auto !important; display:block !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) label { font-size:11px !important; font-weight:700 !important; color:#1F4E8C !important; text-align:center !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) span, div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) p { font-size:10px !important; color:#6B7280 !important; text-align:center !important; }</style>""", unsafe_allow_html=True)
+        pdf_file = st.file_uploader("Upload Protocol (PDF)", type=["pdf"], key="pdf_uploader")
+        if pdf_file is not None:
+            pdf_file.seek(0)
+            data = extract_protocol_data(pdf_file)
+            if data:
+                st.success("Protocol auto-filled from PDF")
+                if data.get("study_title"):
+                    st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["study_title"]] = data["study_title"]
+                if data.get("protocol_id"):
+                    st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["protocol_id"]] = data["protocol_id"]
+                if data.get("therapeutic_area"):
+                    st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["therapeutic_area"]] = data["therapeutic_area"]
+                if data.get("indication"):
+                    ind_val = data["indication"]
+                    ind_opts = get_trial_indication_options(data.get("therapeutic_area", ""))
+                    if ind_val not in ind_opts:
+                        ind_opts = sorted(set(ind_opts + [ind_val]))
+                    st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["indication"]] = ind_val
 
         c1, c2 = st.columns(2)
         c1.text_input("Study Title",key=TRIAL_CONTEXT_WIDGET_KEYS["study_title"],placeholder="e.g. Phase III Evaluation of NSCLC in Oncology")
@@ -1154,8 +1137,8 @@ if page == "Study Setup and Site Filtering":
         st.divider()
         st.markdown("<div class='section-head'>Clinical Parameters</div>",unsafe_allow_html=True)
         c3, c4 = st.columns(2)
-        c3.selectbox("Therapeutic Area",ta_options,key=ta_key)
-        c4.selectbox("Indication",indication_options,key=indication_key)
+        c3.selectbox("Therapeutic Area", ["-- None --"] + ta_options, key=ta_key)
+        c4.selectbox("Indication", ["-- None --"] + indication_options, key=indication_key)
         st.radio("Study Phase",TRIAL_PHASE_OPTIONS,horizontal=True,key=TRIAL_CONTEXT_WIDGET_KEYS["phase"])
         st.divider()
         st.markdown("<div class='section-head'>Population & Geography</div>",unsafe_allow_html=True)
@@ -1165,14 +1148,6 @@ if page == "Study Setup and Site Filtering":
         c7.number_input("Max Age (in years)",min_value=0,step=1,key=TRIAL_CONTEXT_WIDGET_KEYS["max_age"])
         c8.selectbox("Gender",["All","Male","Female"],key=TRIAL_CONTEXT_WIDGET_KEYS["gender"])
         st.multiselect("Target Geographies",geo_options,key=geos_key)
-        with st.expander("Advanced Feasibility Parameters",expanded=False):
-            a1, a2 = st.columns(2)
-            a1.checkbox("Require Biomarker Testing",key=TRIAL_CONTEXT_WIDGET_KEYS["require_biomarker_testing"])
-            a1.caption("Prioritize sites with in-house genomic sequencing capabilities.")
-            a1.checkbox("Rare Disease Protocol",key=TRIAL_CONTEXT_WIDGET_KEYS["rare_disease_protocol"])
-            a1.caption("Adjusts AI modeling for hyper-specific patient populations.")
-            a2.selectbox("Competitive Trial Density Tolerance",["Low","Medium (Standard)","High"],key=TRIAL_CONTEXT_WIDGET_KEYS["competitive_trial_density_tolerance"])
-            a2.selectbox("IRB Preference",["Either","Central Preferred","Local Accepted"],key=TRIAL_CONTEXT_WIDGET_KEYS["irb_preference"])
         if st.button("Generate AI Recommendations ⚡",use_container_width=True,type="primary"):
             captured_context = get_trial_context_from_setup_widgets()
             captured_context["generated_at"] = now_ts()
@@ -1344,14 +1319,6 @@ elif page == "Feasibility Analysis and Qualification":
         selected_site_id = st.selectbox("Choose Site for Analysis",site_options["site_id"].tolist(),format_func=lambda sid: site_labels.get(sid,sid))
         row = analysis_df[analysis_df["site_id"] == selected_site_id].iloc[0]
         st.markdown(f"<div class='surface-dark'><div style='display:flex;justify-content:space-between;align-items:center'><div><div style='font-size:22px;font-weight:800'>{row['site_name']}</div><div>{row['city']}, United States  •  PI: {row['matched_pi_name']}  •  Feasibility Completed</div></div><div style='font-size:46px;font-weight:800'>{int(row['ai_rank_score'])}<span style='font-size:18px'>/100</span></div></div></div>",unsafe_allow_html=True)
-        st.markdown("<div class='section-head' style='margin-top:12px'>Key Metrics</div>",unsafe_allow_html=True)
-        m1,m2,m3,m4,m5,m6 = st.columns(6)
-        m1.metric("AI Match Score",f"{int(row.get('ai_rank_score',0))}/100")
-        m2.metric("Feasibility Score",f"{int(row.get('feasibility_score',0))}/100")
-        m3.metric("Qualification Score",f"{int(row.get('qualification_score',0))}/100")
-        m4.metric("Risk Level",row.get("risk_level","Unknown"))
-        m5.metric("PI Experience",f"{int(row.get('pi_years_experience',0) or 0)} yrs")
-        m6.metric("Enrollment Rate",f"{round(float(row.get('avg_enroll_rate_per_month') or 0),1)}/mo")
         st.divider()
         st.markdown("### Qualification & CDA Review")
         with st.container(border=True):
