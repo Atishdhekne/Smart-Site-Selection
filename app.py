@@ -70,17 +70,148 @@ TRUE_BOOL_VALUES = {"1","true","t","yes","y"}
 FALSE_BOOL_VALUES = {"0","false","f","no","n",""}
 
 # ── Static data ──────────────────────────────────────────────────────────────
-# All Site Location / Location values forced to "United States"
+DASHBOARD_TRIALS_DATA = pd.DataFrame([
+    {"Trial ID": "Novo-Nordisk Devote Trial", "Selected Sites": 45, "Avg AI Score": 96, "Avg Qualification Score": 94, "Total Enrollment Achieved": 754},
+    {"Trial ID": "Novo-Nordisk Semaglutide Trial", "Selected Sites": 33, "Avg AI Score": 92, "Avg Qualification Score": 93, "Total Enrollment Achieved": 582},
+    {"Trial ID": "Novo-Nordisk Lira-Ramdan Trial", "Selected Sites": 45, "Avg AI Score": 97, "Avg Qualification Score": 96, "Total Enrollment Achieved": 812},
+    {"Trial ID": "Novo-Nordisk Degludec Trial", "Selected Sites": 47, "Avg AI Score": 98, "Avg Qualification Score": 98, "Total Enrollment Achieved": 871},
+])
+
 FEASIBILITY_DIST_DATA = pd.DataFrame([
     {"Site Details":"Hospital 135","Site Location":"United States","PI Details":"Dr. Ling Brown","Survey Status":"Delivered","Reminders":0},
     {"Site Details":"Hospital 78","Site Location":"United States","PI Details":"Dr. Priya Kim","Survey Status":"Delivered","Reminders":0},
     {"Site Details":"Hospital 95","Site Location":"United States","PI Details":"Dr. David Mehta","Survey Status":"Delivered","Reminders":0},
 ])
 
+# ── CHANGE: Feasibility questionnaire with editable Site Selection Parameters ──
+# Default values for questionnaire parameters
+DEFAULT_FEASIBILITY_PARAMS = [
+    {"category": "Patient Recruitment and Management (~30%)", "param": "Patient demographics & diversity alignment"},
+    {"category": "", "param": "Eligible patient pool & enrollment rate"},
+    {"category": "", "param": "Historical recruitment & dropout trends"},
+    {"category": "", "param": "Competition from other trials"},
+    {"category": "Investigator and Staff Qualification (~25%)", "param": "PI experience & therapeutic expertise"},
+    {"category": "", "param": "Staff training & certifications (GCP)"},
+    {"category": "", "param": "Sub-investigator & CRC availability"},
+    {"category": "", "param": "Data Quality Standards and TAT"},
+    {"category": "", "param": "CRA coverage & monitoring bandwidth"},
+    {"category": "Site Infrastructure and Technology Facilities (~20%)", "param": "Study-specific equipment & labs"},
+    {"category": "", "param": "Pharmacy, IP storage & readiness"},
+    {"category": "", "param": "Digital/DCT capability (eSource, telehealth)"},
+    {"category": "", "param": "Data quality & audit findings"},
+    {"category": "Regulatory and Compliance Readiness (~15%)", "param": "IRB/EC approval timelines"},
+    {"category": "", "param": "Inspection history & compliance record"},
+    {"category": "", "param": "SOPs for AE/SAE, deviations"},
+    {"category": "", "param": "Local & global regulatory alignment"},
+    {"category": "Budgetary Considerations (~10%)", "param": "Insurance & reimbursement policies"},
+    {"category": "", "param": "Contract negotiation efficiency"},
+    {"category": "", "param": "Per-patient cost analysis"},
+    {"category": "", "param": "Startup cost timelines"},
+]
+
 QUAL_DASHBOARD_DATA = pd.DataFrame([
-    {"Site Details":"Hospital 135","Site Location":"United States","PI Details":"Dr. Ling Brown","Site Email ID":"Ling.Brown@gmail.com","PI Experience (Yrs)":14.2,"Patient Population":9,"CDA Sign-off":"Yes","Regulatory & Ethics":8,"Investigator Qualification":9,"Site Infrastructure":8,"Budgetary Considerations":9,"Enrollment Rate":7,"Retention Rate":9,"Data Entry Lag":9,"Screen Fail Rate":7,"Competing Trials":8,"Protocol Deviation Rate":8,"Risk":8,"Overall Score":8.3},
-    {"Site Details":"Hospital 78","Site Location":"United States","PI Details":"Dr. Priya Kim","Site Email ID":"Priya.Kim@gmail.com","PI Experience (Yrs)":21.9,"Patient Population":8,"CDA Sign-off":"Yes","Regulatory & Ethics":7,"Investigator Qualification":9,"Site Infrastructure":9,"Budgetary Considerations":8,"Enrollment Rate":9,"Retention Rate":8,"Data Entry Lag":7,"Screen Fail Rate":8,"Competing Trials":8,"Protocol Deviation Rate":8,"Risk":8,"Overall Score":8.0},
-    {"Site Details":"Hospital 95","Site Location":"United States","PI Details":"Dr. David Mehta","Site Email ID":"David.Mehta@gmail.com","PI Experience (Yrs)":8.4,"Patient Population":9,"CDA Sign-off":"Yes","Regulatory & Ethics":9,"Investigator Qualification":9,"Site Infrastructure":9,"Budgetary Considerations":9,"Enrollment Rate":8,"Retention Rate":7,"Data Entry Lag":8,"Screen Fail Rate":9,"Competing Trials":8,"Protocol Deviation Rate":8,"Risk":8,"Overall Score":8.5},
+    {
+        "Site Details": "Hospital 135",
+        "Site Location": "United States",
+        "PI Details": "Dr. Ling Brown",
+        "Site email ID": "Ling.Brown@gmail.com",
+        "PI Experience(Years)": 14.2,
+        "Patient population (System generated score)": 8,
+        "Patient population (Site feasibility Score)": 9,
+        "CDA sign-off(Yes/No)": "Yes",
+        "Regulatory, ethics comittee and compliance readiness (System generated score)": 9,
+        "Regulatory, ethics comittee and compliance readiness (Site feasibility Score)": 8,
+        "Investigator and Site staff Qualification (System generated score)": 9,
+        "Investigator and Site staff Qualification (Site feasibility Score)": 9,
+        "Site Infrastructure and technolodgy facility (System generated score)": 9,
+        "Site Infrastructure and technolodgy facility (Site feasibility Score)": 8,
+        "Budgetory Considerations (System generated score)": 9,
+        "Budgetory Considerations (Site feasibility Score)": 9,
+        "Enrollment rate (System generated score)": 8,
+        "Enrollment rate (Site feasibility Score)": 7,
+        "Retention rate (System generated score)": 8,
+        "Retention rate (Site feasibility Score)": 9,
+        "Data entry lag (System generated score)": 9,
+        "Data entry lag (Site feasibility Score)": 9,
+        "Screen fail rate (System generated score)": 7,
+        "Screen fail rate (Site feasibility Score)": 7,
+        "Competing trials (System generated score)": 8,
+        "Competing trials (Site feasibility Score)": 8,
+        "Protocol deviation rate (System generated score)": 7,
+        "Protocol deviation rate (Site feasibility Score)": 8,
+        "Risk (System generated score)": 7,
+        "Risk (Site feasibility Score)": 8,
+        "Overall socre (System generated score)": 8.2,
+        "Overall socre (Site feasibility Score)": 8.3,
+    },
+    {
+        "Site Details": "Hospital 78",
+        "Site Location": "United States",
+        "PI Details": "Dr. Priya Kim",
+        "Site email ID": "Priya.Kim@gmail.com",
+        "PI Experience(Years)": 21.9,
+        "Patient population (System generated score)": 9,
+        "Patient population (Site feasibility Score)": 8,
+        "CDA sign-off(Yes/No)": "Yes",
+        "Regulatory, ethics comittee and compliance readiness (System generated score)": 8,
+        "Regulatory, ethics comittee and compliance readiness (Site feasibility Score)": 7,
+        "Investigator and Site staff Qualification (System generated score)": 8,
+        "Investigator and Site staff Qualification (Site feasibility Score)": 9,
+        "Site Infrastructure and technolodgy facility (System generated score)": 9,
+        "Site Infrastructure and technolodgy facility (Site feasibility Score)": 9,
+        "Budgetory Considerations (System generated score)": 8,
+        "Budgetory Considerations (Site feasibility Score)": 8,
+        "Enrollment rate (System generated score)": 8,
+        "Enrollment rate (Site feasibility Score)": 9,
+        "Retention rate (System generated score)": 9,
+        "Retention rate (Site feasibility Score)": 8,
+        "Data entry lag (System generated score)": 8,
+        "Data entry lag (Site feasibility Score)": 7,
+        "Screen fail rate (System generated score)": 8,
+        "Screen fail rate (Site feasibility Score)": 8,
+        "Competing trials (System generated score)": 9,
+        "Competing trials (Site feasibility Score)": 8,
+        "Protocol deviation rate (System generated score)": 8,
+        "Protocol deviation rate (Site feasibility Score)": 8,
+        "Risk (System generated score)": 8,
+        "Risk (Site feasibility Score)": 8,
+        "Overall socre (System generated score)": 8.4,
+        "Overall socre (Site feasibility Score)": 8.0,
+    },
+    {
+        "Site Details": "Hospital 95",
+        "Site Location": "United States",
+        "PI Details": "Dr. David Mehta",
+        "Site email ID": "David.Mehta@gmail.com",
+        "PI Experience(Years)": 8.4,
+        "Patient population (System generated score)": 9,
+        "Patient population (Site feasibility Score)": 9,
+        "CDA sign-off(Yes/No)": "Yes",
+        "Regulatory, ethics comittee and compliance readiness (System generated score)": 9,
+        "Regulatory, ethics comittee and compliance readiness (Site feasibility Score)": 9,
+        "Investigator and Site staff Qualification (System generated score)": 8,
+        "Investigator and Site staff Qualification (Site feasibility Score)": 9,
+        "Site Infrastructure and technolodgy facility (System generated score)": 8,
+        "Site Infrastructure and technolodgy facility (Site feasibility Score)": 9,
+        "Budgetory Considerations (System generated score)": 9,
+        "Budgetory Considerations (Site feasibility Score)": 9,
+        "Enrollment rate (System generated score)": 9,
+        "Enrollment rate (Site feasibility Score)": 8,
+        "Retention rate (System generated score)": 7,
+        "Retention rate (Site feasibility Score)": 7,
+        "Data entry lag (System generated score)": 8,
+        "Data entry lag (Site feasibility Score)": 8,
+        "Screen fail rate (System generated score)": 9,
+        "Screen fail rate (Site feasibility Score)": 9,
+        "Competing trials (System generated score)": 7,
+        "Competing trials (Site feasibility Score)": 8,
+        "Protocol deviation rate (System generated score)": 9,
+        "Protocol deviation rate (Site feasibility Score)": 8,
+        "Risk (System generated score)": 9,
+        "Risk (Site feasibility Score)": 8,
+        "Overall socre (System generated score)": 8.5,
+        "Overall socre (Site feasibility Score)": 8.5,
+    },
 ])
 
 FINAL_SELECTION_DATA = pd.DataFrame([
@@ -90,10 +221,30 @@ FINAL_SELECTION_DATA = pd.DataFrame([
 ])
 
 STUDY_SETUP_SITE_DATA = pd.DataFrame([
-    {"Site Details":"Hospital 135","Site Location":"United States","PI Details":"Dr. Ling Brown","Site Email ID":"Ling.Brown@gmail.com","PI Experience (Yrs)":14.2,"Patient Population":9,"Regulatory & Ethics":9,"Investigator Qualification":8,"Site Infrastructure":9,"Budgetary Considerations":7,"Enrollment Rate":9,"Retention Rate":9,"Data Entry Lag":7,"Screen Fail Rate":8,"Competing Trials":8,"Protocol Deviation Rate":8,"Risk":9,"AI Match Score":98,"Select for Feasibility":"Yes"},
-    {"Site Details":"Hospital 78","Site Location":"United States","PI Details":"Dr. Priya Kim","Site Email ID":"Priya.Kim@gmail.com","PI Experience (Yrs)":21.9,"Patient Population":8,"Regulatory & Ethics":9,"Investigator Qualification":9,"Site Infrastructure":8,"Budgetary Considerations":9,"Enrollment Rate":8,"Retention Rate":7,"Data Entry Lag":8,"Screen Fail Rate":8,"Competing Trials":8,"Protocol Deviation Rate":7,"Risk":9,"AI Match Score":93,"Select for Feasibility":"Yes"},
-    {"Site Details":"Hospital 95","Site Location":"United States","PI Details":"Dr. David Mehta","Site Email ID":"David.Mehta@gmail.com","PI Experience (Yrs)":8.4,"Patient Population":9,"Regulatory & Ethics":9,"Investigator Qualification":9,"Site Infrastructure":9,"Budgetary Considerations":8,"Enrollment Rate":7,"Retention Rate":8,"Data Entry Lag":9,"Screen Fail Rate":8,"Competing Trials":8,"Protocol Deviation Rate":9,"Risk":9,"AI Match Score":97,"Select for Feasibility":"Yes"},
+    {"Site Details":"Hospital 135","Site Location":"United States","PI Details":"Dr. Ling Brown","Site Email ID":"Ling.Brown@gmail.com","PI Experience (Yrs)":14.2,"Patient Population":9,"Regulatory & Ethics":9,"Investigator Qualification":8,"Site Infrastructure":9,"Budgetary Considerations":7,"Enrollment Rate":9,"Retention Rate":9,"Data Entry Lag":7,"Screen Fail Rate":8,"Competing Trials":8,"Protocol Deviation Rate":8,"Risk":9,"AI Match Score":98,"Select for Feasibility":"Yes","CDA Executed":"Yes","Run Feasibility Distribution":False},
+    {"Site Details":"Hospital 78","Site Location":"United States","PI Details":"Dr. Priya Kim","Site Email ID":"Priya.Kim@gmail.com","PI Experience (Yrs)":21.9,"Patient Population":8,"Regulatory & Ethics":9,"Investigator Qualification":9,"Site Infrastructure":8,"Budgetary Considerations":9,"Enrollment Rate":8,"Retention Rate":7,"Data Entry Lag":8,"Screen Fail Rate":8,"Competing Trials":8,"Protocol Deviation Rate":7,"Risk":9,"AI Match Score":93,"Select for Feasibility":"Yes","CDA Executed":"Yes","Run Feasibility Distribution":False},
+    {"Site Details":"Hospital 95","Site Location":"United States","PI Details":"Dr. David Mehta","Site Email ID":"David.Mehta@gmail.com","PI Experience (Yrs)":8.4,"Patient Population":9,"Regulatory & Ethics":9,"Investigator Qualification":9,"Site Infrastructure":9,"Budgetary Considerations":8,"Enrollment Rate":7,"Retention Rate":8,"Data Entry Lag":9,"Screen Fail Rate":8,"Competing Trials":8,"Protocol Deviation Rate":9,"Risk":9,"AI Match Score":97,"Select for Feasibility":"Yes","CDA Executed":"Yes","Run Feasibility Distribution":False},
+    {"Site Details":"Hospital","Site Location":"United States","PI Details":"Dr. David Miller","Site Email ID":"David.Miller@gmail.com","PI Experience (Yrs)":9.2,"Patient Population":8,"Regulatory & Ethics":9,"Investigator Qualification":9,"Site Infrastructure":8,"Budgetary Considerations":9,"Enrollment Rate":9,"Retention Rate":8,"Data Entry Lag":7,"Screen Fail Rate":8,"Competing Trials":7,"Protocol Deviation Rate":9,"Risk":7,"AI Match Score":93,"Select for Feasibility":"Yes","CDA Executed":"No","Run Feasibility Distribution":False},
 ])
+
+# In-memory notifications store
+# In-memory notifications store
+if "app_notifications" not in st.session_state:
+    st.session_state["app_notifications"] = [
+        {"id": 1, "type": "CDA Signed", "site": "Hospital 135", "message": "CDA signed for Hospital 135 — Dr. Ling Brown", "time": "10 min ago", "read": False},
+        {"id": 2, "type": "Feasibility Survey Initiated", "site": "Hospital 78", "message": "Feasibility survey initiated for Hospital 78 — Dr. Priya Kim", "time": "25 min ago", "read": False},
+        {"id": 3, "type": "Feasibility Survey Received by Site", "site": "Hospital 95", "message": "Feasibility survey received by Hospital 95 — Dr. David Mehta", "time": "1 hr ago", "read": True},
+        {"id": 4, "type": "Feasibility Response Received by Sponsor", "site": "Hospital 135", "message": "Feasibility response received by sponsor from Hospital 135", "time": "2 hrs ago", "read": True},
+        {"id": 5, "type": "CDA Signed", "site": "Hospital 95", "message": "CDA signed for Hospital 95 — Dr. David Mehta", "time": "3 hrs ago", "read": False},
+    ]
+
+# ── Init run feasibility distribution selections ──
+if "run_feasibility_selections" not in st.session_state:
+    st.session_state["run_feasibility_selections"] = STUDY_SETUP_SITE_DATA.copy()
+
+# ── Init editable questionnaire params in session state ──
+if "fq_params" not in st.session_state:
+    st.session_state["fq_params"] = [row["param"] for row in DEFAULT_FEASIBILITY_PARAMS]
 
 
 def now_ts() -> str:
@@ -385,7 +536,28 @@ CHAT_USAGE = load_or_init_chat_usage()
 TRIAL = CONFIG.get("new_trial", {})
 WEIGHTS = CONFIG.get("scoring_weights", {})
 TRIAL_PHASE_OPTIONS = ["I","I/II","II","III","IV"]
-TRIAL_CONTEXT_WIDGET_KEYS = {"study_title":"setup_study_title","protocol_id":"setup_protocol_id","therapeutic_area":"setup_therapeutic_area","indication":"setup_indication","phase":"setup_phase","total_target_enrollment":"setup_total_target_enrollment","min_age":"setup_min_age","max_age":"setup_max_age","gender":"setup_gender","target_geographies":"setup_target_geographies","require_biomarker_testing":"setup_require_biomarker_testing","rare_disease_protocol":"setup_rare_disease_protocol","competitive_trial_density_tolerance":"setup_competitive_trial_density_tolerance","irb_preference":"setup_irb_preference"}
+TRIAL_CONTEXT_WIDGET_KEYS = {
+    "study_title":"setup_study_title",
+    "protocol_id":"setup_protocol_id",
+    "therapeutic_area":"setup_therapeutic_area",
+    "indication":"setup_indication",
+    "phase":"setup_phase",
+    "total_target_enrollment":"setup_total_target_enrollment",
+    "min_age":"setup_min_age",
+    "max_age":"setup_max_age",
+    "gender":"setup_gender",
+    "target_geographies":"setup_target_geographies",
+    "require_biomarker_testing":"setup_require_biomarker_testing",
+    "rare_disease_protocol":"setup_rare_disease_protocol",
+    "competitive_trial_density_tolerance":"setup_competitive_trial_density_tolerance",
+    "irb_preference":"setup_irb_preference",
+    "expected_duration":"setup_expected_duration",
+    "expected_enrollment_count":"setup_expected_enrollment_count",
+    "expected_screen_fail_rate":"setup_expected_screen_fail_rate",
+    "expected_withdrawal_rate":"setup_expected_withdrawal_rate",
+    "no_of_sites":"setup_no_of_sites",
+    "primary_objective":"setup_primary_objective",
+}
 
 def get_trial_ta_options() -> list[str]:
     values = set()
@@ -440,7 +612,16 @@ def _build_default_trial_context(trial_seed: dict) -> dict:
         trial_phase = "III"
     geo_options = sorted(SITES["region"].dropna().astype(str).str.strip().unique().tolist())
     default_geos = geo_options[:3] if geo_options else []
-    return {"study_title":"","protocol_id":"","therapeutic_area":trial_ta,"indication":trial_ind,"phase":trial_phase,"total_target_enrollment":450,"min_age":18,"max_age":85,"gender":"All","target_geographies":default_geos,"require_biomarker_testing":True,"rare_disease_protocol":False,"competitive_trial_density_tolerance":"Medium (Standard)","irb_preference":"Central Preferred","generated_at":""}
+    return {
+        "study_title":"","protocol_id":"","therapeutic_area":trial_ta,"indication":trial_ind,
+        "phase":trial_phase,"total_target_enrollment":450,"min_age":18,"max_age":85,"gender":"All",
+        "target_geographies":default_geos,"require_biomarker_testing":True,"rare_disease_protocol":False,
+        "competitive_trial_density_tolerance":"Medium (Standard)","irb_preference":"Central Preferred",
+        "generated_at":"",
+        "expected_duration":"1 year","expected_enrollment_count":83,
+        "expected_screen_fail_rate":10,"expected_withdrawal_rate":5,
+        "no_of_sites":10,"primary_objective":"To reduce the HbA1c value to 6.5-7.5",
+    }
 
 DEFAULT_TRIAL_CONTEXT = _build_default_trial_context(TRIAL)
 
@@ -484,7 +665,23 @@ def normalize_trial_context(raw_context: dict | None) -> dict:
     irb_preference = normalize_text_value(merged.get("irb_preference",DEFAULT_TRIAL_CONTEXT["irb_preference"])).strip() or DEFAULT_TRIAL_CONTEXT["irb_preference"]
     if irb_preference not in {"Either","Central Preferred","Local Accepted"}:
         irb_preference = DEFAULT_TRIAL_CONTEXT["irb_preference"]
-    return {"study_title":normalize_text_value(merged.get("study_title",DEFAULT_TRIAL_CONTEXT["study_title"])).strip(),"protocol_id":normalize_text_value(merged.get("protocol_id",DEFAULT_TRIAL_CONTEXT["protocol_id"])).strip(),"therapeutic_area":therapeutic_area,"indication":indication,"phase":phase,"total_target_enrollment":max(1,total_target_enrollment),"min_age":min_age,"max_age":max_age,"gender":gender,"target_geographies":target_geographies,"require_biomarker_testing":normalize_bool_value(merged.get("require_biomarker_testing",DEFAULT_TRIAL_CONTEXT["require_biomarker_testing"])),"rare_disease_protocol":normalize_bool_value(merged.get("rare_disease_protocol",DEFAULT_TRIAL_CONTEXT["rare_disease_protocol"])),"competitive_trial_density_tolerance":tolerance,"irb_preference":irb_preference,"generated_at":normalize_text_value(merged.get("generated_at",DEFAULT_TRIAL_CONTEXT["generated_at"])).strip()}
+    return {
+        "study_title":normalize_text_value(merged.get("study_title",DEFAULT_TRIAL_CONTEXT["study_title"])).strip(),
+        "protocol_id":normalize_text_value(merged.get("protocol_id",DEFAULT_TRIAL_CONTEXT["protocol_id"])).strip(),
+        "therapeutic_area":therapeutic_area,"indication":indication,"phase":phase,
+        "total_target_enrollment":max(1,total_target_enrollment),"min_age":min_age,"max_age":max_age,
+        "gender":gender,"target_geographies":target_geographies,
+        "require_biomarker_testing":normalize_bool_value(merged.get("require_biomarker_testing",DEFAULT_TRIAL_CONTEXT["require_biomarker_testing"])),
+        "rare_disease_protocol":normalize_bool_value(merged.get("rare_disease_protocol",DEFAULT_TRIAL_CONTEXT["rare_disease_protocol"])),
+        "competitive_trial_density_tolerance":tolerance,"irb_preference":irb_preference,
+        "generated_at":normalize_text_value(merged.get("generated_at",DEFAULT_TRIAL_CONTEXT["generated_at"])).strip(),
+        "expected_duration":normalize_text_value(merged.get("expected_duration",DEFAULT_TRIAL_CONTEXT["expected_duration"])),
+        "expected_enrollment_count":merged.get("expected_enrollment_count",DEFAULT_TRIAL_CONTEXT["expected_enrollment_count"]),
+        "expected_screen_fail_rate":merged.get("expected_screen_fail_rate",DEFAULT_TRIAL_CONTEXT["expected_screen_fail_rate"]),
+        "expected_withdrawal_rate":merged.get("expected_withdrawal_rate",DEFAULT_TRIAL_CONTEXT["expected_withdrawal_rate"]),
+        "no_of_sites":merged.get("no_of_sites",DEFAULT_TRIAL_CONTEXT["no_of_sites"]),
+        "primary_objective":normalize_text_value(merged.get("primary_objective",DEFAULT_TRIAL_CONTEXT["primary_objective"])),
+    }
 
 def reset_trial_identity_fields_for_new_entry() -> None:
     st.session_state["trial_context"] = normalize_trial_context(st.session_state.get("trial_context"))
@@ -732,15 +929,6 @@ def acknowledge_notification(note_id: str):
         notes.at[idx[0],"acknowledged"] = True
         save_csv(normalize_notifications(notes), "notifications.csv")
 
-def ranking_explanation(site_row: pd.Series) -> pd.DataFrame:
-    mapping = {"avg_enroll_rate_per_month_scaled":"Enrollment rate","screen_fail_rate_scaled":"Screen fail rate","protocol_deviation_rate_scaled":"Protocol deviation rate","data_entry_lag_days_scaled":"Data entry lag","retention_rate_scaled":"Retention rate","competing_trials_same_ta_scaled":"Competing trials"}
-    rows = []
-    for col, label in mapping.items():
-        value = float(site_row.get(col,0) or 0)
-        weight = float(WEIGHTS.get(col,0) or 0)
-        rows.append({"Factor":label,"Scaled input":round(value,3),"Weight":weight,"Contribution":round(value*weight,3)})
-    return pd.DataFrame(rows).sort_values("Contribution",ascending=False)
-
 def style_app():
     st.markdown("""
     <style>
@@ -756,7 +944,6 @@ def style_app():
     }
     [data-testid="stSidebar"] * { color:#FFFFFF !important; }
     [data-testid="stSidebar"] .stRadio label { background: transparent !important; }
-    /* CHANGE: Logout and AI Assistant buttons styled blue */
     [data-testid="stSidebar"] .stButton > button {
       background: #2563EB !important; color: #FFFFFF !important;
       border: 1px solid #1d4ed8 !important; border-radius: 10px !important; font-weight: 700 !important;
@@ -764,7 +951,6 @@ def style_app():
     [data-testid="stSidebar"] .stButton > button:hover {
       background: #1d4ed8 !important; border-color: #1e40af !important;
     }
-    /* CHANGE: Workflow radio labels all white */
     [data-testid="stSidebar"] .stRadio label p,
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] label,
     [data-testid="stSidebar"] .stRadio [role="radiogroup"] p,
@@ -775,9 +961,95 @@ def style_app():
     header[data-testid="stHeader"] { display: none !important; }
     #MainMenu { display: none !important; }
     .stAppDeployButton { display: none !important; }
-    .topbar { background: var(--sidebar-blue); border-radius: 16px; padding: 14px 18px; color: #FFFFFF; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+    .topbar {
+      background: var(--sidebar-blue); border-radius: 16px; padding: 14px 18px;
+      color: #FFFFFF; margin-bottom: 18px;
+      display: flex; justify-content: space-between; align-items: center; gap: 14px;
+    }
     .crumb { font-size: 14px; opacity:.95; }
     .search-pill { background: rgba(255,255,255,.94); color: var(--text-muted); border-radius:12px; padding:10px 16px; min-width:260px; text-align:left; }
+
+    /* ── NOTIFICATION STYLES ── */
+    .notif-topbar-row {
+      display: flex; align-items: center; gap: 10px;
+      background: #F0F6FF; border: 1px solid #C7DEFF;
+      border-radius: 12px; padding: 10px 16px; margin-bottom: 14px;
+    }
+    .notif-bell-icon { font-size: 20px; }
+    .notif-badge {
+      background: #EF4444; color: #fff; border-radius: 999px;
+      font-size: 11px; font-weight: 800; padding: 2px 8px;
+      min-width: 20px; text-align: center; line-height: 18px;
+      display: inline-block;
+    }
+    .notif-label { font-weight: 700; font-size: 14px; color: #1F4E8C; flex: 1; }
+    .notif-panel {
+      background: #fff; border: 1px solid var(--border); border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(16,24,40,.14); overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .notif-header {
+      background: var(--panel-dark-alt); color: #fff;
+      padding: 12px 18px; font-weight: 800; font-size: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .notif-item {
+      padding: 10px 16px; border-bottom: 1px solid #EEF3F8;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .notif-item.unread { background: #F0F6FF; }
+    .notif-type-badge {
+      display: inline-block; padding: 2px 8px; border-radius: 999px;
+      font-size: 11px; font-weight: 700; white-space: nowrap;
+    }
+    .badge-cda { background: #dcfce7; color: #166534; }
+    .badge-initiated { background: #dbeafe; color: #1d4ed8; }
+    .badge-received-site { background: #fef3c7; color: #92400e; }
+    .badge-received-sponsor { background: #ede9fe; color: #5b21b6; }
+    .notif-msg { font-size: 13px; color: #1F2937; margin: 2px 0; }
+    .notif-time { font-size: 11px; color: #9CA3AF; }
+
+    /* ── SOURCE SYSTEMS (sidebar vertical list) ── */
+    .source-sys-list {
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 8px 4px;
+      margin: 4px 0 8px 0;
+    }
+    .source-sys-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px; border-radius: 7px;
+      font-size: 12px; font-weight: 600; color: #FFFFFF !important;
+      margin-bottom: 2px; transition: background 0.15s;
+    }
+    .source-sys-item:hover { background: rgba(255,255,255,0.15); }
+    .source-sys-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #4ADE80; flex-shrink: 0;
+    }
+
+    /* ── PROTOCOL UPLOAD AREA ── */
+    .proto-upload-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .proto-fetch-box {
+      background: #F8FBFF;
+      border: 2px dashed #C7DEFF;
+      border-radius: 12px;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100px;
+      text-align: center;
+      color: #6B7280;
+      font-size: 13px;
+    }
+
     .page-title { font-size: 28px; font-weight: 800; color: var(--text-dark); margin-bottom: 2px; }
     .page-sub { color: var(--text-muted); font-size: 15px; margin-bottom: 18px; }
     .metrics { display:grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap:14px; margin-bottom:18px; }
@@ -820,19 +1092,152 @@ def style_app():
     div[data-testid="stTabs"] button[role="tab"] p { color: #1F2937 !important; }
     div[data-testid="stCheckbox"] label p { color: #1F2937 !important; font-weight: 500 !important; }
     @media (max-width: 980px) { .metrics { grid-template-columns:1fr 1fr; } }
+    .source-tag {
+      display: inline-block; background: #E0EDFF; color: #1d4ed8;
+      border-radius: 6px; font-size: 11px; font-weight: 700;
+      padding: 2px 8px; margin: 2px 3px;
+    }
+    .trials-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    .trials-table th { background: #1F4E8C; color: #fff; padding: 8px 14px; font-size: 13px; text-align: left; }
+    .trials-table td { padding: 8px 14px; font-size: 13px; border-bottom: 1px solid #EEF3F8; color: #1F2937; }
+    .trials-table tr:hover td { background: #F0F6FF; }
+
+    /* ── PROTOCOL SECTION SOURCE SYSTEMS ── */
+    .proto-source-row {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      background: #F0F6FF; border: 1px solid #C7DEFF;
+      border-radius: 10px; padding: 10px 14px;
+      margin-bottom: 14px; align-items: center;
+    }
+    .proto-source-label {
+      font-size: 12px; font-weight: 700; color: #1F4E8C;
+      margin-right: 4px; white-space: nowrap;
+    }
+    .proto-source-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #DBEAFE; color: #1d4ed8;
+      border-radius: 999px; font-size: 11px; font-weight: 700;
+      padding: 3px 10px; white-space: nowrap;
+    }
+    .proto-source-chip .dot { width:6px; height:6px; border-radius:50%; background:#22C55E; display:inline-block; }
     </style>
     """, unsafe_allow_html=True)
 
-def render_topbar(title: str):
-    st.markdown(f"<div class='topbar'><div class='crumb'>SmartSite Select &gt; {title}</div><div class='search-pill'>🔎 Search studies, sites, PIs...</div></div>",unsafe_allow_html=True)
 
-def metric_cards(items):
-    html = "<div class='metrics'>"
-    for label, value, tone in items:
-        klass = "metric-card light" if tone == "light" else "metric-card"
-        html += f"<div class='{klass}'><div class='metric-label'>{label}</div><div class='metric-value'>{value}</div></div>"
-    html += "</div>"
-    st.markdown(html, unsafe_allow_html=True)
+def render_notification_panel():
+    """Render notifications at the TOP of the page, right below topbar."""
+    notifs = st.session_state.get("app_notifications", [])
+    unread_count = sum(1 for n in notifs if not n["read"])
+
+    def type_badge(ntype):
+        if "CDA" in ntype:
+            return f"<span class='notif-type-badge badge-cda'>✅ {ntype}</span>"
+        elif "Initiated" in ntype:
+            return f"<span class='notif-type-badge badge-initiated'>🚀 {ntype}</span>"
+        elif "Received by Site" in ntype:
+            return f"<span class='notif-type-badge badge-received-site'>📨 {ntype}</span>"
+        elif "Received by Sponsor" in ntype:
+            return f"<span class='notif-type-badge badge-received-sponsor'>📩 {ntype}</span>"
+        return f"<span class='notif-type-badge badge-initiated'>{ntype}</span>"
+
+    badge_html = f"<span class='notif-badge'>{unread_count}</span>" if unread_count else "<span class='notif-badge' style='background:#22C55E'>0</span>"
+    st.markdown(f"""
+    <div class='notif-topbar-row'>
+      <span class='notif-bell-icon'>🔔</span>
+      {badge_html}
+      <span class='notif-label'>Notifications — {unread_count} unread</span>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_toggle, col_markall = st.columns([1, 1])
+    with col_toggle:
+        btn_label = "▼ Hide Notifications" if st.session_state.get("notif_open", False) else "▶ Show Notifications"
+        if st.button(btn_label, key="notif_toggle_btn", use_container_width=True):
+            st.session_state["notif_open"] = not st.session_state.get("notif_open", False)
+            st.rerun()
+    with col_markall:
+        if st.button("✓ Mark All as Read", key="notif_mark_all", use_container_width=True):
+            for n in st.session_state["app_notifications"]:
+                n["read"] = True
+            st.rerun()
+
+    if st.session_state.get("notif_open", False):
+        items_html = ""
+        for n in notifs:
+            cls = "notif-item unread" if not n["read"] else "notif-item"
+            items_html += f"""
+            <div class='{cls}'>
+              <div style='flex:1'>
+                {type_badge(n['type'])}
+                <div class='notif-msg'>{n['message']}</div>
+                <div class='notif-time'>🕐 {n['time']} &nbsp;|&nbsp; 🏥 {n['site']}</div>
+              </div>
+            </div>
+            """
+        st.markdown(f"""
+        <div class='notif-panel'>
+          <div class='notif-header'>
+            <span>🔔 All Notifications</span>
+            <span style='font-size:12px;opacity:.8'>{len(notifs)} total · {unread_count} unread</span>
+          </div>
+          {items_html}
+          <div style='padding:10px 16px;font-size:12px;color:#9CA3AF;text-align:center'>
+            Types: CDA Signed · Feasibility Survey Initiated · Received by Site · Response Received by Sponsor
+          </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+
+def render_topbar(title: str, show_notifications: bool = True):
+    st.markdown(f"<div class='topbar'><div class='crumb'>SmartSite Select &gt; {title}</div><div class='search-pill'>🔎 Search studies, sites, PIs...</div></div>", unsafe_allow_html=True)
+    if show_notifications:
+        render_notification_panel()
+
+
+SOURCE_SYSTEMS = [
+    ("🗂️", "CTMS"),
+    ("📊", "EDC"),
+    ("🔍", "Citeline"),
+    ("📋", "RIMs"),
+    ("📁", "eTMF"),
+    ("👨‍⚕️", "Investigator Platform"),
+    ("🌐", "Clinical Trials.gov"),
+    ("📂", "SharePoint"),
+]
+
+def render_sidebar_source_systems():
+    st.markdown("### Connected Source Systems")
+    
+    # Render each source system as a separate markdown call
+    # instead of one big HTML block
+    for icon, name in SOURCE_SYSTEMS:
+        st.markdown(
+            f"""
+            <div class='source-sys-item'>
+                <span class='source-sys-dot'></span>
+                <span>{icon} {name}</span>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+def render_protocol_source_systems():
+    """
+    Render connected source systems as pill chips inside the Protocol Definition section.
+    Replaces the old inline render_source_systems() badge row from the page header.
+    """
+    chips_html = ""
+    for icon, name in SOURCE_SYSTEMS:
+        chips_html += f"<span class='proto-source-chip'><span class='dot'></span>{icon} {name}</span>"
+    
+
+
+def render_source_systems():
+    """Render source system badges inline (kept for other pages)."""
+    systems = ["CTMS", "EDC", "Citeline", "RIMs", "eTMF", "Investigator Platform", "Clinical Trials.gov", "SharePoint"]
+    badges = "".join([f"<span class='source-tag'>{s}</span>" for s in systems])
+    st.markdown(f"<div style='margin-bottom:10px'><strong style='font-size:13px;color:#6B7280'>Source Systems:</strong> {badges}</div>", unsafe_allow_html=True)
+
 
 def apply_global_filters(df: pd.DataFrame, filters: dict) -> pd.DataFrame:
     out = df.copy()
@@ -915,14 +1320,14 @@ def perform_logout() -> None:
     st.session_state["current_user"] = ""
     st.session_state["current_full_name"] = ""
     st.session_state["current_role"] = ""
-    st.session_state["page"] = "Study Setup and Site Filtering"
+    st.session_state["page"] = "Dashboard & Protocol Configuration"
     reset_chat_history()
     reset_trial_identity_fields_for_new_entry()
     set_flash_message("Logged out successfully.")
     st.rerun()
 
 def render_login_screen() -> None:
-    render_topbar("Login")
+    render_topbar("Login", show_notifications=False)
     render_flash_message()
     st.markdown("<div class='page-title'>SmartSite Select Login</div><div class='page-sub'>Authenticate with a local account to access workflow pages and persistence actions.</div>",unsafe_allow_html=True)
     left, center, right = st.columns([1.0,1.2,1.0])
@@ -1025,6 +1430,20 @@ def render_chatbot_panel():
             st.rerun()
 
 
+def metric_cards(items):
+    """Render a row of metric cards."""
+    cols = st.columns(len(items))
+    for col, (label, value, style) in zip(cols, items):
+        card_class = "metric-card light" if style == "light" else "metric-card"
+        with col:
+            st.markdown(f"""
+            <div class='{card_class}'>
+              <div class='metric-label'>{label}</div>
+              <div class='metric-value'>{value}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # BOOT
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1044,7 +1463,12 @@ initialize_trial_context_state()
 ACTIVE_TRIAL_CONTEXT = get_active_trial_context()
 MASTER = build_master(SITES,PIS,PERF,FEAS,REC,ACTIONS,TRACK,ACTIVE_TRIAL_CONTEXT["therapeutic_area"],ACTIVE_TRIAL_CONTEXT["indication"],ACTIVE_TRIAL_CONTEXT["phase"])
 
-workflow_labels = {"Study Setup and Site Filtering":"Study Setup & Site Filtering","Feasibility Distribution and Responses":"Feasibility Distribution & Responses","Feasibility Analysis and Qualification":"Feasibility Analysis & Qualification","Final Selection":"Final Selection"}
+workflow_labels = {
+    "Dashboard & Protocol Configuration": "Dashboard & Protocol Configuration",
+    "Feasibility Distribution and Responses": "Feasibility Distribution & Responses",
+    "Feasibility Analysis and Qualification": "Feasibility Analysis & Qualification",
+    "Final Selection": "Final Selection",
+}
 filter_enabled_pages = {"Feasibility Distribution and Responses","Feasibility Analysis and Qualification","Final Selection"}
 workflow_pages = list(workflow_labels.keys())
 if "page" not in st.session_state or st.session_state["page"] not in workflow_labels:
@@ -1063,11 +1487,13 @@ with st.sidebar:
     page = st.radio("Workflow",workflow_pages,index=workflow_pages.index(st.session_state["page"]),label_visibility="visible")
     st.session_state["page"] = page
     st.markdown("---")
+
     if page in filter_enabled_pages:
         page_key = page_filter_key_prefix(page)
         filters = render_page_filters(MASTER, key_prefix=f"filters_{page_key}")
     else:
-        st.caption("Study filters are hidden on this page.")
+        render_sidebar_source_systems()
+
     st.markdown("---")
     if st.button("🤖 AI Assistant", use_container_width=True, key="sidebar_chatbot_btn"):
         st.session_state["chatbot_open"] = not st.session_state.get("chatbot_open", False)
@@ -1082,10 +1508,25 @@ render_topbar(workflow_labels[page])
 render_flash_message()
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# PAGE 1 — Study Setup AND Site Filtering
+# PAGE 1 — Dashboard & Protocol Configuration
 # ═══════════════════════════════════════════════════════════════════════════════
-if page == "Study Setup and Site Filtering":
-    st.markdown("<div class='page-title'>Study Setup & Site Filtering</div><div class='page-sub'>Configure clinical trial parameters, upload a digitalized protocol copy, and identify candidate investigator sites.</div>",unsafe_allow_html=True)
+if page == "Dashboard & Protocol Configuration":
+    # ── CHANGE: Removed render_source_systems() from here (moved into Protocol Definition section) ──
+    st.markdown("<div class='page-title'>Dashboard & Protocol Configuration</div><div class='page-sub'>Overview of active trials and protocol configuration for site selection.</div>", unsafe_allow_html=True)
+
+    # ── Active Trials Dashboard Table ─────────────────────────────────────────
+    with st.container(border=True):
+        st.markdown("<div class='section-head'>📊 Active Trials Dashboard</div>", unsafe_allow_html=True)
+        st.dataframe(
+            DASHBOARD_TRIALS_DATA, use_container_width=True, hide_index=True,
+            column_config={
+                "Avg AI Score": st.column_config.ProgressColumn("Avg AI Score", min_value=0, max_value=100, format="%d"),
+                "Avg Qualification Score": st.column_config.ProgressColumn("Avg Qual Score", min_value=0, max_value=100, format="%d"),
+                "Total Enrollment Achieved": st.column_config.NumberColumn("Total Enrollment", format="%d"),
+            }
+        )
+
+    st.divider()
 
     ta_options = get_trial_ta_options()
     if not ta_options:
@@ -1110,14 +1551,66 @@ if page == "Study Setup and Site Filtering":
         st.session_state[geos_key] = [g for g in active_trial_context["target_geographies"] if g in geo_options]
 
     with st.container(border=True):
-        st.markdown("<div class='section-head'>Protocol Definition</div>",unsafe_allow_html=True)
-        st.markdown("""<style>div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) { border:1.5px dashed #2F6DB5 !important; border-radius:10px !important; background:#F8FAFD !important; padding:10px 12px !important; max-width:360px !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) section { border:none !important; background:transparent !important; padding:0 !important; display:flex !important; flex-direction:column !important; align-items:center !important; min-height:unset !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) button { background:#1F4E8C !important; color:#ffffff !important; border:none !important; border-radius:7px !important; font-size:11px !important; font-weight:700 !important; padding:5px 18px !important; margin:4px auto 0 auto !important; display:block !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) label { font-size:11px !important; font-weight:700 !important; color:#1F4E8C !important; text-align:center !important; } div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) span, div[data-testid="stFileUploader"]:has(input[accept*=".pdf"]) p { font-size:10px !important; color:#6B7280 !important; text-align:center !important; }</style>""", unsafe_allow_html=True)
-        pdf_file = st.file_uploader("Upload Protocol (PDF)", type=["pdf"], key="pdf_uploader")
+        st.markdown("<div class='section-head'>Protocol Definition</div>", unsafe_allow_html=True)
+
+        # ── CHANGE: Source systems shown here inside Protocol Definition, replacing old header badges ──
+        render_protocol_source_systems()
+
+        # ── CHANGE: Only functional upload/fetch widgets — no decorative HTML buttons above ──
+        upload_col, fetch_col = st.columns(2)
+        with upload_col:
+            st.markdown("""
+            <style>
+            div[data-testid="stFileUploader"] > label { display: none !important; }
+            div[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {
+                background: #F8FBFF !important;
+                border: 2px dashed #C7DEFF !important;
+                border-radius: 12px !important;
+                height: 160px !important;
+                min-height: 160px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 20px !important;
+                box-shadow: none !important;
+            }
+            div[data-testid="stFileUploaderDropzoneInstructions"] span,
+            div[data-testid="stFileUploaderDropzoneInstructions"] small { display: none !important; }
+            div[data-testid="stFileUploaderDropzoneInstructions"]::before { content: "📄"; font-size: 30px; }
+            div[data-testid="stFileUploaderDropzoneInstructions"]::after {
+                content: "Upload Protocol (PDF)";
+                font-size: 15px; font-weight: 700; color: #1F4E8C;
+            }
+            div[data-testid="stFileUploader"] button { display: none !important; }
+            </style>
+            """, unsafe_allow_html=True)
+            pdf_file = st.file_uploader(
+                "",
+                type=["pdf"],
+                key="pdf_uploader",
+                label_visibility="collapsed"
+            )
+
+        with fetch_col:
+            st.markdown("""
+            <div style='background:#F8FBFF;border:2px dashed #C7DEFF;border-radius:12px;
+                        padding:20px 16px;text-align:center;color:#6B7280;font-size:13px;
+                        height:160px;display:flex;flex-direction:column;
+                        align-items:center;justify-content:center;gap:6px;
+                        margin-top:16px;box-sizing:border-box;'>
+              <span style='font-size:30px'>🌐</span>
+              <strong style='color:#1F4E8C;font-size:15px'>Fetch Digital Protocol</strong>
+              <span style='font-size:12px'>Connect to ClinicalTrials.gov or sponsor registry</span>
+              <em style='color:#94A3B8;font-size:11px'>(Integration coming soon)</em>
+            </div>
+            """, unsafe_allow_html=True)
+
         if pdf_file is not None:
             pdf_file.seek(0)
             data = extract_protocol_data(pdf_file)
             if data:
-                st.success("Protocol auto-filled from PDF")
+                st.success("✅ Protocol auto-filled from PDF — fields updated below.")
                 if data.get("study_title"):
                     st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["study_title"]] = data["study_title"]
                 if data.get("protocol_id"):
@@ -1132,16 +1625,28 @@ if page == "Study Setup and Site Filtering":
                     st.session_state[TRIAL_CONTEXT_WIDGET_KEYS["indication"]] = ind_val
 
         c1, c2 = st.columns(2)
-        c1.text_input("Study Title",key=TRIAL_CONTEXT_WIDGET_KEYS["study_title"],placeholder="e.g. Phase III Evaluation of NSCLC in Oncology")
-        c2.text_input("Protocol ID",key=TRIAL_CONTEXT_WIDGET_KEYS["protocol_id"],placeholder="e.g. ST-III-ONC-03")
+        c1.text_input("Study Title", key=TRIAL_CONTEXT_WIDGET_KEYS["study_title"], placeholder="e.g. Phase III Evaluation of NSCLC in Oncology")
+        c2.text_input("Protocol ID", key=TRIAL_CONTEXT_WIDGET_KEYS["protocol_id"], placeholder="e.g. ST-III-ONC-03")
         st.divider()
-        st.markdown("<div class='section-head'>Clinical Parameters</div>",unsafe_allow_html=True)
+        st.markdown("<div class='section-head'>Clinical Parameters</div>", unsafe_allow_html=True)
         c3, c4 = st.columns(2)
         c3.selectbox("Therapeutic Area", ["-- None --"] + ta_options, key=ta_key)
         c4.selectbox("Indication", ["-- None --"] + indication_options, key=indication_key)
-        st.radio("Study Phase",TRIAL_PHASE_OPTIONS,horizontal=True,key=TRIAL_CONTEXT_WIDGET_KEYS["phase"])
+        st.radio("Study Phase", TRIAL_PHASE_OPTIONS, horizontal=True, key=TRIAL_CONTEXT_WIDGET_KEYS["phase"])
+
         st.divider()
-        st.markdown("<div class='section-head'>Population & Geography</div>",unsafe_allow_html=True)
+        st.markdown("<div class='section-head'>Additional Clinical Parameters</div>", unsafe_allow_html=True)
+        cp1, cp2, cp3 = st.columns(3)
+        cp1.text_input("Expected Duration", key=TRIAL_CONTEXT_WIDGET_KEYS["expected_duration"], placeholder="e.g. 1 year")
+        cp2.number_input("Expected Enrollment Count", min_value=0, step=1, key=TRIAL_CONTEXT_WIDGET_KEYS["expected_enrollment_count"])
+        cp3.number_input("Expected Screen Fail Rate (%)", min_value=0, max_value=100, step=1, key=TRIAL_CONTEXT_WIDGET_KEYS["expected_screen_fail_rate"])
+        cp4, cp5, cp6 = st.columns(3)
+        cp4.number_input("Expected Withdrawal Rate (%)", min_value=0, max_value=100, step=1, key=TRIAL_CONTEXT_WIDGET_KEYS["expected_withdrawal_rate"])
+        cp5.number_input("No. of Sites", min_value=1, step=1, key=TRIAL_CONTEXT_WIDGET_KEYS["no_of_sites"])
+        cp6.text_input("Primary Objective", key=TRIAL_CONTEXT_WIDGET_KEYS["primary_objective"], placeholder="e.g. To reduce HbA1c value to 6.5-7.5")
+
+        st.divider()
+        st.markdown("<div class='section-head'>Population & Geography</div>", unsafe_allow_html=True)
         c5, c6, c7, c8 = st.columns([1.25,1.0,1.0,0.95])
         c5.number_input("Total Target Enrollment",min_value=1,step=10,key=TRIAL_CONTEXT_WIDGET_KEYS["total_target_enrollment"])
         c6.number_input("Min Age (in years)",min_value=0,step=1,key=TRIAL_CONTEXT_WIDGET_KEYS["min_age"])
@@ -1163,73 +1668,133 @@ if page == "Study Setup and Site Filtering":
 
     st.divider()
 
-    # ── Feasibility Questionnaire Checklist ──────────────────────────────────
+    # ── Automate Feasibility Questionnaire ────────────────────────────────────
     with st.container(border=True):
-        st.markdown("<div class='section-head'>Feasibility Questionnaire Checklist Template</div>",unsafe_allow_html=True)
-        st.caption("Review and customise the checklist items to be included in feasibility surveys sent to sites.")
-        checklist_categories = {
-            "Operational Parameters":[("enroll_rate","Enrollment Rate (avg patients/month for this TA/Indication)"),("site_activation","Site Activation Timeline (days from contract to FPI)"),("dropout_rate","Dropout / Early Termination Rate (%)"),("screen_fail","Screen Failure Rate (%)"),("protocol_deviation","Protocol Deviation Rate (%)"),("data_entry_lag","Data Entry Lag (days from visit to EDC entry)")],
-            "Clinical & Feasibility Parameters":[("investigator_qual","Investigator Qualifications & Experience in Indication"),("patient_pool","Patient Pool Estimate (eligible patients per year)"),("competing_trials","Competing Trials in Same TA at Site"),("site_facility","Site Facility Assessment (space, staff, equipment)"),("data_quality","Data Quality Score (historical EDC query rate)"),("biomarker_cap","Biomarker / Genomic Testing Capability (in-house)")],
-            "Quality & Compliance Parameters":[("audit_findings","Audit Findings (last 3 years — number of critical/major)"),("sae_reporting","SAE Reporting Timeliness (% on-time in last trial)"),("monitoring_score","Monitoring Visit Compliance Score"),("gcp_training","GCP Training Currency (date of last certification)"),("irb_approval","IRB / Ethics Committee Approval Timeline (avg days)")],
-            "Infrastructure & Resource Parameters":[("tech_readiness","Technology Readiness (EDC, ePRO, eConsent access)"),("satellite_facility","Satellite Facility Availability"),("ip_storage","Investigational Product (IP) Storage Capability"),("qualified_staff","Qualified Staff Count (dedicated study coordinators)"),("lab_capability","Central / Local Lab Capability & Accreditation")],
-            "Insurance / Reimbursement & Regulatory":[("country_reg_timeline","Country Regulatory Submission Timeline (avg days)"),("contract_policy","Contract & Budget Negotiation Flexibility"),("insurance_coverage","Site Insurance / Indemnity Coverage Confirmed"),("central_irb","Central IRB Acceptance (site willing to use central IRB)"),("patient_reimbursement","Patient Reimbursement / Travel Support Available")],
-        }
-        if "fq_checklist" not in st.session_state:
-            st.session_state["fq_checklist"] = {item_key: True for items in checklist_categories.values() for item_key, _ in items}
-        tabs = st.tabs(list(checklist_categories.keys()))
-        for tab, (category, items) in zip(tabs, checklist_categories.items()):
-            with tab:
-                for item_key, label in items:
-                    current_val = st.session_state["fq_checklist"].get(item_key, True)
-                    new_val = st.checkbox(label,value=current_val,key=f"fq_{item_key}")
-                    st.session_state["fq_checklist"][item_key] = new_val
-        col_dl, col_rst = st.columns([1,1])
-        with col_dl:
-            selected_items = [(cat,label) for cat, items in checklist_categories.items() for item_key, label in items if st.session_state["fq_checklist"].get(item_key,True)]
-            ta_label = active_trial_context["therapeutic_area"].replace(" ","_")
-            ind_label = active_trial_context["indication"].replace(" ","_")
-            lines = ["Feasibility Questionnaire Checklist Template",f"TA: {active_trial_context['therapeutic_area']}",f"Indication: {active_trial_context['indication']}",""]
-            current_cat = None
-            for cat, label in selected_items:
-                if cat != current_cat:
-                    lines.append(f"\n## {cat}")
-                    current_cat = cat
-                lines.append(f"  [ ] {label}")
-            st.download_button("⬇ Download Checklist Template (.txt)",data="\n".join(lines),file_name=f"feasibility_checklist_{ta_label}_{ind_label}.txt",mime="text/plain",use_container_width=True)
-        with col_rst:
-            if st.button("Reset All to Default (All Checked)",use_container_width=True,key="fq_reset_btn"):
-                for cat_items in checklist_categories.values():
-                    for item_key, _ in cat_items:
-                        st.session_state["fq_checklist"][item_key] = True
-                st.rerun()
-        selected_count = sum(1 for v in st.session_state["fq_checklist"].values() if v)
-        total_count = sum(len(items) for items in checklist_categories.values())
-        st.caption(f"{selected_count} of {total_count} checklist items selected.")
+        st.markdown("<div class='section-head'>Automate Feasibility Questionnaire</div>", unsafe_allow_html=True)
+        st.caption("Review and customise the questionnaire parameters to be included in feasibility surveys sent to sites.")
+
+        # ── CHANGE: Editable questionnaire table using st.data_editor ──
+        # Build current editable dataframe from session state params
+        current_params = st.session_state.get("fq_params", [row["param"] for row in DEFAULT_FEASIBILITY_PARAMS])
+        # Ensure length matches
+        if len(current_params) != len(DEFAULT_FEASIBILITY_PARAMS):
+            current_params = [row["param"] for row in DEFAULT_FEASIBILITY_PARAMS]
+            st.session_state["fq_params"] = current_params
+
+        editable_df = pd.DataFrame({
+            "Feasibility Title & Recommended Weightage": [row["category"] for row in DEFAULT_FEASIBILITY_PARAMS],
+            "Site Selection Parameters": current_params,
+        })
+
+        edited_df = st.data_editor(
+            editable_df,
+            use_container_width=True,
+            hide_index=True,
+            num_rows="fixed",
+            column_config={
+                "Feasibility Title & Recommended Weightage": st.column_config.TextColumn(
+                    "Feasibility Title & Recommended Weightage",
+                    disabled=True,
+                    width="medium",
+                ),
+                "Site Selection Parameters": st.column_config.TextColumn(
+                    "Site Selection Parameters (Editable)",
+                    width="large",
+                    help="Click any cell to edit the parameter text",
+                ),
+            },
+            key="fq_questionnaire_editor",
+        )
+
+        # Persist edits back to session state
+        if edited_df is not None:
+            new_params = edited_df["Site Selection Parameters"].tolist()
+            if new_params != st.session_state.get("fq_params"):
+                st.session_state["fq_params"] = new_params
+
+        if st.button("🤖 FEASIBILITY QUESTIONNAIRE AUTOMATION", use_container_width=True, type="primary", key="fq_automation_btn"):
+            st.success("Feasibility questionnaire automation triggered! Survey parameters will be auto-distributed based on the above weightage configuration.")
 
     st.divider()
 
-    # ── Site Filtering & Ranking ──────────────────────────────────────────────
-    st.markdown("<div class='page-title' style='font-size:22px'>Site Filtering & Ranking</div><div class='page-sub'>CRA-identified potential investigator sites ranked by AI match score.</div>",unsafe_allow_html=True)
+    # ── Site Filtering & Distribution ─────────────────────────────────────────
+    st.markdown("<div class='page-title' style='font-size:22px'>SITE FILTERING & DISTRIBUTION</div><div class='page-sub'>CRA-identified potential investigator sites ranked by AI match score. Source: CTMS · EDC · Citeline databases.</div>",unsafe_allow_html=True)
     metric_cards([
         ("Total Sites Analyzed",len(STUDY_SETUP_SITE_DATA),"dark"),
         ("High Match Candidates",int((STUDY_SETUP_SITE_DATA["AI Match Score"] >= 85).sum()),"light"),
         ("Avg. AI Match Score",f"{int(STUDY_SETUP_SITE_DATA['AI Match Score'].mean())}%","dark"),
         ("Sites for Feasibility",int((STUDY_SETUP_SITE_DATA["Select for Feasibility"] == "Yes").sum()),"dark"),
     ])
-    st.markdown("<div class='section-head' style='margin-top:8px'>Candidate Sites</div>",unsafe_allow_html=True)
-    st.dataframe(STUDY_SETUP_SITE_DATA,use_container_width=True,hide_index=True,column_config={"AI Match Score":st.column_config.ProgressColumn("AI Match Score",min_value=0,max_value=100,format="%d%%")})
-    if st.button("Proceed to Feasibility →",use_container_width=True,type="primary"):
-        set_flash_message("Proceeding to Feasibility Distribution.")
-        st.session_state["page"] = "Feasibility Distribution and Responses"
-        clear_and_rerun()
+    st.markdown("<div class='section-head' style='margin-top:8px'>Candidate Sites</div>", unsafe_allow_html=True)
+    st.caption("✅ Tick the **Run Feasibility Distribution** checkbox for sites you want to include, then click the button below.")
 
-    # CHANGE: "Explainable AI — Top Site" section and dashboard below it completely removed
+    edited_sites = st.data_editor(
+        st.session_state["run_feasibility_selections"],
+        use_container_width=True,
+        hide_index=True,
+        disabled=[
+            "Site Details", "Site Location", "PI Details", "Site Email ID",
+            "PI Experience (Yrs)", "Patient Population", "Regulatory & Ethics",
+            "Investigator Qualification", "Site Infrastructure", "Budgetary Considerations",
+            "Enrollment Rate", "Retention Rate", "Data Entry Lag", "Screen Fail Rate",
+            "Competing Trials", "Protocol Deviation Rate", "Risk", "AI Match Score",
+            "Select for Feasibility", "CDA Executed"
+        ],
+        column_config={
+            "AI Match Score": st.column_config.ProgressColumn(
+                "AI Match Score", min_value=0, max_value=100, format="%d%%"
+            ),
+            "Run Feasibility Distribution": st.column_config.CheckboxColumn(
+                "Run Feasibility Distribution",
+                help="Tick to include this site in the feasibility distribution run",
+                default=False,
+            ),
+            "CDA Executed": st.column_config.TextColumn("CDA Executed"),
+            "Select for Feasibility": st.column_config.TextColumn("Select for Feasibility"),
+        },
+        key="candidate_sites_editor",
+    )
+
+    if edited_sites is not None:
+        st.session_state["run_feasibility_selections"] = edited_sites
+
+    ticked_sites = edited_sites[edited_sites["Run Feasibility Distribution"] == True]["Site Details"].tolist() if edited_sites is not None else []
+    ticked_count = len(ticked_sites)
+
+    col_btn, col_info = st.columns([2, 1])
+    with col_btn:
+        btn_label = f"Run Feasibility Distribution → ({ticked_count} site{'s' if ticked_count != 1 else ''} selected)" if ticked_count else "Run Feasibility Distribution →"
+        if st.button(btn_label, use_container_width=True, type="primary", key="run_feasibility_btn"):
+            if ticked_count == 0:
+                st.warning("⚠️ Please tick at least one site.")
+            else:
+                set_flash_message(f"Feasibility Distribution started for: {', '.join(ticked_sites)}")
+                st.session_state["page"] = "Feasibility Distribution and Responses"
+                clear_and_rerun()
+    with col_info:
+        if ticked_count:
+            st.success(f"✅ {ticked_count} site(s) selected")
+        else:
+            st.info("☑ No sites ticked yet")
+        btn_label = f"Run Feasibility Distribution → ({ticked_count} site{'s' if ticked_count != 1 else ''} selected)" if ticked_count else "Run Feasibility Distribution →"
+        st.button(btn_label, use_container_width=True, type="primary", key="run_feasibility_btn",
+                  on_click=lambda: (
+                      set_flash_message(f"Feasibility Distribution started for: {', '.join(ticked_sites)}")
+                      if ticked_count > 0 else None
+                  ))
+        if st.session_state.get("run_feasibility_btn") and ticked_count == 0:
+            st.warning("⚠️ Please tick at least one site in the **Run Feasibility Distribution** column before proceeding.")
+        elif st.session_state.get("run_feasibility_btn") and ticked_count > 0:
+            st.session_state["page"] = "Feasibility Distribution and Responses"
+            clear_and_rerun()
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE 2 — Feasibility Distribution AND Responses
 # ═══════════════════════════════════════════════════════════════════════════════
 elif page == "Feasibility Distribution and Responses":
     st.markdown("<div class='page-title'>Feasibility Distribution & Responses</div><div class='page-sub'>Distribute feasibility surveys to AI-ranked sites and monitor response rates.</div>",unsafe_allow_html=True)
+    render_source_systems()
 
     distribution_df = get_feasibility_distribution_page_df(MASTER, base_view)
     responses_df = get_feasibility_responses_page_df(base_view)
@@ -1245,44 +1810,47 @@ elif page == "Feasibility Distribution and Responses":
         ("SLA Breaches",breaches,"light"),
     ])
 
-    st.markdown("### Distribution")
-    with st.container(border=True):
-        st.markdown("<div class='section-head'>Survey Distribution Controls</div>",unsafe_allow_html=True)
-        c_left, c_right = st.columns([1,1])
-        with c_left:
-            template_name = st.text_input("Survey Template", "Diabetes Mellitus Feasibility")
-            chosen = st.multiselect("Distribution list",options=FEASIBILITY_DIST_DATA["Site Details"].tolist(),default=FEASIBILITY_DIST_DATA["Site Details"].tolist())
-        with c_right:
-            st.markdown("<br>",unsafe_allow_html=True)
-            if st.button("Send Feasibility Surveys",use_container_width=True):
-                ids = distribution_df[distribution_df["site_name"].isin(chosen)]["site_id"].tolist()
-                if ids:
-                    persist_distribution(ids, template)
-                    for sid in ids:
-                        upsert_notification(sid,"Feasibility Survey Submitted","Medium",f"Survey distributed using template {template}")
-                set_flash_message(f"Distribution persisted for {len(ids)} sites.")
-                clear_and_rerun()
-            pending_ids = distribution_df[(distribution_df["survey_sent"]) & (~distribution_df["response_received"])]["site_id"].tolist()
-            if st.button("Send Reminders",use_container_width=True):
-                if pending_ids:
-                    persist_reminders(pending_ids)
-                    for sid in pending_ids:
-                        upsert_notification(sid,"SLA Breach Warning","High","Reminder triggered")
-                set_flash_message(f"Reminder counts updated for {len(pending_ids)} sites.")
-                clear_and_rerun()
+    # st.markdown("### Distribution")
+    # with st.container(border=True):
+    #     st.markdown("<div class='section-head'>Survey Distribution Controls</div>",unsafe_allow_html=True)
+    #     c_left, c_right = st.columns([1,1])
+    #     with c_left:
+    #         template_name = st.text_input("Survey Template", "Diabetes Mellitus Feasibility")
+    #         chosen = st.multiselect("Distribution list",options=FEASIBILITY_DIST_DATA["Site Details"].tolist(),default=FEASIBILITY_DIST_DATA["Site Details"].tolist())
+    #     with c_right:
+    #         st.markdown("<br>",unsafe_allow_html=True)
+    #         if st.button("Send Feasibility Surveys",use_container_width=True):
+    #             ids = distribution_df[distribution_df["site_name"].isin(chosen)]["site_id"].tolist()
+    #             if ids:
+    #                 persist_distribution(ids, template_name)
+    #                 for sid in ids:
+    #                     upsert_notification(sid,"Feasibility Survey Initiated","Medium",f"Feasibility survey initiated using template {template_name}")
+    #                 for site_name in chosen:
+    #                     st.session_state["app_notifications"].insert(0, {
+    #                         "id": len(st.session_state["app_notifications"]) + 1,
+    #                         "type": "Feasibility Survey Initiated",
+    #                         "site": site_name,
+    #                         "message": f"Feasibility survey initiated for {site_name}",
+    #                         "time": "just now",
+    #                         "read": False,
+    #                     })
+    #             set_flash_message(f"Distribution persisted for {len(ids) if ids else 0} sites.")
+    #             clear_and_rerun()
+    #         pending_ids = distribution_df[(distribution_df["survey_sent"]) & (~distribution_df["response_received"])]["site_id"].tolist()
+    #         if st.button("Send Reminders",use_container_width=True):
+    #             if pending_ids:
+    #                 persist_reminders(pending_ids)
+    #             set_flash_message(f"Reminder counts updated for {len(pending_ids)} sites.")
+    #             clear_and_rerun()
 
     st.divider()
 
-    # Feasibility Distribution Status table — all locations United States
     st.markdown("<div class='surface-dark'><div class='section-head' style='color:#fff'>Feasibility Distribution Status</div>",unsafe_allow_html=True)
     st.dataframe(FEASIBILITY_DIST_DATA,use_container_width=True,hide_index=True)
     st.markdown("</div>",unsafe_allow_html=True)
 
     st.divider()
 
-    # Site Response Tracking
-    # CHANGE: If Survey Status is Pending → Feasibility Score = 0
-    # CHANGE: All Site Location = United States
     st.markdown("### Site Response Tracking")
     st.markdown("<div class='surface-dark'><div class='section-head' style='color:#fff'>Site Response Tracking</div>",unsafe_allow_html=True)
     if not responses_df.empty:
@@ -1290,9 +1858,7 @@ elif page == "Feasibility Distribution and Responses":
         tracking["Survey Status"] = tracking["response_received"].map({True:"Received",False:"Pending"})
         tracking.loc[(tracking["Survey Status"] == "Pending") & (tracking["days_open"] > 7),"Survey Status"] = "Overdue"
         tracking["Last Contact"] = tracking["days_open"].map(lambda d: f"{int(d)} days ago" if d else "Today")
-        # CHANGE: Feasibility Score = 0 when status is Pending or Overdue
         tracking.loc[tracking["Survey Status"].isin(["Pending","Overdue"]),"feasibility_score"] = 0
-        # CHANGE: All Site Location = United States
         tracking["country_label"] = "United States"
         tracking = tracking[["site_name","country_label","matched_pi_name","Survey Status","feasibility_score","Last Contact","reminder_count"]]
         tracking.columns = ["Site Details","Site Location","PI Details","Survey Status","Feasibility Score","Last Contact","Reminders"]
@@ -1301,11 +1867,13 @@ elif page == "Feasibility Distribution and Responses":
         st.info("No active response records. Send surveys to populate this table.")
     st.markdown("</div>",unsafe_allow_html=True)
 
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE 3 — Feasibility Analysis AND Qualification
 # ═══════════════════════════════════════════════════════════════════════════════
 elif page == "Feasibility Analysis and Qualification":
     st.markdown("<div class='page-title'>Feasibility Analysis & Qualification</div><div class='page-sub'>Drill into site-level feasibility detail with AI explainability, then review qualification decisions.</div>",unsafe_allow_html=True)
+    render_source_systems()
     st.caption("This page reflects current sidebar Study Filters.")
 
     analysis_df = get_feasibility_analysis_page_df(base_view)
@@ -1320,26 +1888,50 @@ elif page == "Feasibility Analysis and Qualification":
         row = analysis_df[analysis_df["site_id"] == selected_site_id].iloc[0]
         st.markdown(f"<div class='surface-dark'><div style='display:flex;justify-content:space-between;align-items:center'><div><div style='font-size:22px;font-weight:800'>{row['site_name']}</div><div>{row['city']}, United States  •  PI: {row['matched_pi_name']}  •  Feasibility Completed</div></div><div style='font-size:46px;font-weight:800'>{int(row['ai_rank_score'])}<span style='font-size:18px'>/100</span></div></div></div>",unsafe_allow_html=True)
         st.divider()
-        st.markdown("### Qualification & CDA Review")
+
+        st.markdown("### Analysis & Qualification Review")
         with st.container(border=True):
-            st.markdown("<div class='section-head'>Qualification Dashboard</div>",unsafe_allow_html=True)
+            st.markdown("<div class='section-head'>Analysis & Qualification Review</div>", unsafe_allow_html=True)
             st.dataframe(QUAL_DASHBOARD_DATA,use_container_width=True,hide_index=True)
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PAGE 4 — Final Selection
 # ═══════════════════════════════════════════════════════════════════════════════
 elif page == "Final Selection":
     st.markdown("<div class='page-title'>Final Selection</div><div class='page-sub'>Review and confirm the final list of selected investigator sites for this study.</div>",unsafe_allow_html=True)
+    render_source_systems()
+    
     metric_cards([
         ("Selected Sites",len(FINAL_SELECTION_DATA),"dark"),
         ("Avg. AI Score",f"{int(FINAL_SELECTION_DATA['AI Score'].mean())}","dark"),
         ("Avg. Qualification Score",f"{int(FINAL_SELECTION_DATA['Qualification Score'].mean())}","dark"),
         ("All CDA Executed","Yes" if (FINAL_SELECTION_DATA["CDA Status"]=="Executed").all() else "No","light"),
     ])
-    tab_sel, tab_all = st.tabs(["✅ Selected","📋 All Sites"])
+    tab_sel, tab_all = st.tabs(["✅ Selected","Backup","📋 All Sites"])
     with tab_sel:
         st.markdown("<div class='section-head'>Selected Sites</div>",unsafe_allow_html=True)
         st.dataframe(FINAL_SELECTION_DATA,use_container_width=True,hide_index=True,column_config={"AI Score":st.column_config.ProgressColumn("AI Score",min_value=0,max_value=100,format="%d%%"),"Qualification Score":st.column_config.ProgressColumn("Qualification Score",min_value=0,max_value=100,format="%d%%")})
+
+        st.markdown("---")
+        st.markdown("<div class='section-head'>CDA Actions</div>", unsafe_allow_html=True)
+        for _, site_row in FINAL_SELECTION_DATA.iterrows():
+            col_site, col_btn = st.columns([3,1])
+            with col_site:
+                st.markdown(f"**{site_row['Site Name']}** — {site_row['PI Name']} | CDA: `{site_row['CDA Status']}`")
+            with col_btn:
+                if st.button(f"✅ Mark CDA Signed", key=f"cda_{site_row['Site ID']}"):
+                    st.session_state["app_notifications"].insert(0, {
+                        "id": len(st.session_state["app_notifications"]) + 1,
+                        "type": "CDA Signed",
+                        "site": site_row["Site Name"],
+                        "message": f"CDA signed for {site_row['Site Name']} — {site_row['PI Name']}",
+                        "time": "just now",
+                        "read": False,
+                    })
+                    st.success(f"CDA signed notification sent for {site_row['Site Name']}!")
+                    st.rerun()
+
     with tab_all:
         final_df = get_final_selection_page_df(base_view)
         if final_df.empty:
