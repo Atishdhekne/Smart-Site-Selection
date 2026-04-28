@@ -1776,17 +1776,6 @@ if page == "Dashboard & Protocol Configuration":
             st.success(f"✅ {ticked_count} site(s) selected")
         else:
             st.info("☑ No sites ticked yet")
-        btn_label = f"Run Feasibility Distribution → ({ticked_count} site{'s' if ticked_count != 1 else ''} selected)" if ticked_count else "Run Feasibility Distribution →"
-        st.button(btn_label, use_container_width=True, type="primary", key="run_feasibility_btn",
-                  on_click=lambda: (
-                      set_flash_message(f"Feasibility Distribution started for: {', '.join(ticked_sites)}")
-                      if ticked_count > 0 else None
-                  ))
-        if st.session_state.get("run_feasibility_btn") and ticked_count == 0:
-            st.warning("⚠️ Please tick at least one site in the **Run Feasibility Distribution** column before proceeding.")
-        elif st.session_state.get("run_feasibility_btn") and ticked_count > 0:
-            st.session_state["page"] = "Feasibility Distribution and Responses"
-            clear_and_rerun()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
